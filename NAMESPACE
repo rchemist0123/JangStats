@@ -1,0 +1,3 @@
+importFrom("gt", "tab_style", "cell_fill", "cells_body","gt")
+importFrom("stats", "as.formula", "binomial", "confint.default", "glm")
+importFrom("DescTools", "StrAlign")

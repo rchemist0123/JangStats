@@ -1,0 +1,17 @@
+Package: JangStats
+Type: Package
+Title: Functions for efficient data analyses
+Version: 0.1.0
+Author: Yeonhoon Jang
+Maintainer: Yeonhoon Jang <danjang0123@gmail.com>
+Description: Statistical Analyses sets
+    Modulizing functions frequently used in clinical data analyses.
+License: MIT + file LICENSE
+Encoding: UTF-8
+LazyData: true
+Imports: 
+  gt, DescTools
+RoxygenNote: 7.2.3
+Suggests: 
+    testthat (>= 3.0.0)
+Config/testthat/edition: 3
