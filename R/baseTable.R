@@ -5,7 +5,7 @@
 #' @param include Variables including in the table.
 #' @param by A categorical variable for group
 #' @param time_vars time related variables, which are shown as a median(IQR)
-#' @return A baseline chararcteristics table with p-value
+#' @return A baseline characteristics table with p-value
 #' @importFrom gtsummary tbl_summary add_p add_overall all_continuous all_categorical modify_header style_pvalue
 #' @importFrom dplyr all_of
 #' @examples

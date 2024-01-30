@@ -10,7 +10,6 @@
 #' @importFrom survival coxph Surv
 #' @importFrom gt gt tab_style cell_fill cells_body
 #' @importFrom DescTools StrAlign
-
 #' @export
 coxMultTable = function(data, y, time,  Xs) {
   if (y %in% Xs) {

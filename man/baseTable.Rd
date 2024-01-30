@@ -16,7 +16,7 @@ baseTable(data, include, by = NULL, time_vars = NULL)
 \item{time_vars}{time related variables, which are shown as a median(IQR)}
 }
 \value{
-A baseline chararcteristics table with p-value
+A baseline characteristics table with p-value
 }
 \description{
 Create a baseline characteristic table by group variable

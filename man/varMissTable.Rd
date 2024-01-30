@@ -4,12 +4,12 @@
 \alias{varMissTable}
 \title{Missing count, proportion variables table}
 \usage{
-varMissTable(data, include)
+varMissTable(data, include = NA)
 }
 \arguments{
 \item{data}{A data for the table}
 
-\item{include}{Variables to check the number of missing values}
+\item{include}{Variables to check the number of missing values. if NA, all variables in data are included.}
 }
 \description{
 Create a table that checks the n, proportion of missing values of variables
