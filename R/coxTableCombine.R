@@ -1,14 +1,13 @@
 #' Combine univariable & multivariable Cox regression table
 #'
 #' Perform univariable Cox regressions for numerous variables and create a table
-#' @param data A data for analysis
 #' @param uni_tbl A data of univariable Cox regression table
 #' @param mult_tbl A data of multivariable Cox regression table
 #' @return A table of merged table of Cox regressions
 #' @importFrom gt gt tab_style cell_fill cells_body cols_label md ends_with tab_spanner
 #' @export
 
-coxTableCombine = function(data, uni_tbl, mult_tbl){
+coxTableCombine = function(uni_tbl, mult_tbl){
   df = merge(uni_tbl, mult_tbl, by="variable")
   tbl = df |>
     gt() |>

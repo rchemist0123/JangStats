@@ -4,11 +4,9 @@
 \alias{lrTableCombine}
 \title{Combine univariable & multivariable Logistic regression table}
 \usage{
-lrTableCombine(data, uni_tbl, mult_tbl)
+lrTableCombine(uni_tbl, mult_tbl)
 }
 \arguments{
-\item{data}{A data for analysis}
-
 \item{uni_tbl}{A data of univariable logistic regression table}
 
 \item{mult_tbl}{A data of multivariable logistic regression table}

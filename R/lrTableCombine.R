@@ -1,14 +1,13 @@
 #' Combine univariable & multivariable Logistic regression table
 #'
 #' Perform univariable logistic regressions for numerous variables and create a table
-#' @param data A data for analysis
 #' @param uni_tbl A data of univariable logistic regression table
 #' @param mult_tbl A data of multivariable logistic regression table
 #' @return A table of merged table of logistic regressions
 #' @importFrom gt gt tab_style cell_fill cells_body cols_label md ends_with tab_spanner
 #' @export
 
-lrTableCombine = function(data, uni_tbl, mult_tbl){
+lrTableCombine = function(uni_tbl, mult_tbl){
   df = merge(uni_tbl, mult_tbl, by="variable")
   tbl = df |>
     gt() |>

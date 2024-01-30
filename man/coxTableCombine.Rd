@@ -4,11 +4,9 @@
 \alias{coxTableCombine}
 \title{Combine univariable & multivariable Cox regression table}
 \usage{
-coxTableCombine(data, uni_tbl, mult_tbl)
+coxTableCombine(uni_tbl, mult_tbl)
 }
 \arguments{
-\item{data}{A data for analysis}
-
 \item{uni_tbl}{A data of univariable Cox regression table}
 
 \item{mult_tbl}{A data of multivariable Cox regression table}
