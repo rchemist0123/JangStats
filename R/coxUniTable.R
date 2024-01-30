@@ -38,6 +38,10 @@ coxUniTable = function(data, y, time,  Xs) {
       locations = cells_body(
         rows = result$p < 0.2
       )
+    ) |> cols_label(
+      variable = md("**Variable**"),
+      HR_ci = md("**HR (95% CI)**"),
+      p = md("**P value**")
     )
   return(table)
 }

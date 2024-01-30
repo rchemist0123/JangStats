@@ -39,6 +39,10 @@ lrUniTable = function(data, y, Xs) {
         locations = cells_body(
           rows = result$p < 0.2
         )
+      ) |> cols_label(
+        variable = md("**Variable**"),
+        OR_ci = md("**OR (95% CI)**"),
+        p = md("**P value**")
       )
   return(table)
 }
