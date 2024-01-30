@@ -23,14 +23,13 @@ lrMultTable = function(data, y, Xs) {
   coef = exp(coef(fit))[-1]
   confint = exp(confint.default(fit)[2,])
   p = coef(summary(fit))[-1,4]
-  aster = ifelse(p<0.001, "***", ifelse(p<0.01,'**', ifelse(p<0.05,'*',"")))
 
   result = data.frame(
     variable = Xs,
     OR_ci = paste0(format(round(coef,2),nsmall=2), ' (',
                    format(round(confint[1],2),nsmall=2),'-',
                    format(round(confint[2],2),nsmall=2),")"),
-    p = StrAlign(paste(format(round(p,4),nsmall=4), aster), sep="\\l")
+    p = format(round(p, 4),nsmall=4)
   )
 
   table = result |>
