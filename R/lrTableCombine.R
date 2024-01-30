@@ -1,14 +1,14 @@
 #' Combine univariable & multivariable Logistic regression table
 #'
 #' Perform univariable logistic regressions for numerous variables and create a table
-#' @param uni_tbl A data of univariable logistic regression table
-#' @param mult_tbl A data of multivariable logistic regression table
+#' @param uni_tbl A univariable logistic regression table
+#' @param mult_tbl A multivariable logistic regression table
 #' @return A table of merged table of logistic regressions
-#' @importFrom gt gt tab_style cell_fill cells_body cols_label md ends_with tab_spanner
+#' @importFrom gt gt tab_style cell_fill cells_body cols_label md ends_with tab_spanner data_color
 #' @export
 
 lrTableCombine = function(uni_tbl, mult_tbl){
-  df = merge(uni_tbl, mult_tbl, by="variable")
+  df = merge(uni_tbl[["_data"]], mult_tbl[["_data"]], by="variable")
   tbl = df |>
     gt() |>
     cols_label(
@@ -18,21 +18,15 @@ lrTableCombine = function(uni_tbl, mult_tbl){
       OR_ci.y = md("**OR (95% CI)**"),
       p.y = md("**P value**")
     ) |>
-    tab_style(
-      style = list(
-        cell_fill(color="lightyellow")
-      ),
-      locations = cells_body(
-        rows = df$p.x < 0.05,
-      )
+    data_color(
+      columns = ends_with(".x"),
+      rows = df$p.x < 0.05,
+      palette = c("lightyellow")
     ) |>
-    tab_style(
-      style = list(
-        cell_fill(color="lightyellow")
-      ),
-      locations = cells_body(
-        rows = df$p.y < 0.05,
-      )
+    data_color(
+      columns = ends_with(".y"),
+      rows = df$p.y < 0.05,
+      palette = c("lightyellow")
     ) |>
     tab_spanner(label=md("**Univariable**"),
                 columns = ends_with(".x")) |>

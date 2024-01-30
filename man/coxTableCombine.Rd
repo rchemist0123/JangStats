@@ -7,9 +7,9 @@
 coxTableCombine(uni_tbl, mult_tbl)
 }
 \arguments{
-\item{uni_tbl}{A data of univariable Cox regression table}
+\item{uni_tbl}{A univariable Cox regression table}
 
-\item{mult_tbl}{A data of multivariable Cox regression table}
+\item{mult_tbl}{A multivariable Cox regression table}
 }
 \value{
 A table of merged table of Cox regressions

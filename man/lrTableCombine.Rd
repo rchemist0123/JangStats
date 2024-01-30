@@ -7,9 +7,9 @@
 lrTableCombine(uni_tbl, mult_tbl)
 }
 \arguments{
-\item{uni_tbl}{A data of univariable logistic regression table}
+\item{uni_tbl}{A univariable logistic regression table}
 
-\item{mult_tbl}{A data of multivariable logistic regression table}
+\item{mult_tbl}{A multivariable logistic regression table}
 }
 \value{
 A table of merged table of logistic regressions
