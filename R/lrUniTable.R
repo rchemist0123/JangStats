@@ -1,4 +1,4 @@
-#' Univariable Logistic regression
+#' Univariable Logistic regression table
 #'
 #' Perform univariable logistic regressions for numerous variables and create a table
 #' @param data A data for analysis
@@ -6,7 +6,7 @@
 #' @param Xs Names of independent variables or response variables
 #' @return A table of univariable regression about independent variables included in this analysis
 #' @importFrom stats as.formula binomial confint.default glm
-#' @importFrom gt gt tab_style cell_fill cells_body
+#' @importFrom gt gt tab_style cell_fill cells_body cols_label md
 #' @importFrom DescTools StrAlign
 #' @examples
 #' # example code

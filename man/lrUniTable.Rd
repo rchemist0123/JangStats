@@ -2,7 +2,7 @@
 % Please edit documentation in R/lrUniTable.R
 \name{lrUniTable}
 \alias{lrUniTable}
-\title{Univariable Logistic regression}
+\title{Univariable Logistic regression table}
 \usage{
 lrUniTable(data, y, Xs)
 }

@@ -1,4 +1,4 @@
-#' Univariable Cox regression
+#' Univariable Cox regression table
 #'
 #' Perform univariable Cox regressions for numerous variables and create a table
 #' @param data A data for analysis
@@ -8,8 +8,7 @@
 #' @return A table of univariable Cox regression about independent variables included in this analysis.
 #' @importFrom stats as.formula confint.default
 #' @importFrom survival coxph Surv
-#' @importFrom gt gt tab_style cell_fill cells_body
-#' @importFrom DescTools StrAlign
+#' @importFrom gt gt tab_style cell_fill cells_body cols_label md
 #' @export
 coxUniTable = function(data, y, time,  Xs) {
   result = lapply(Xs,

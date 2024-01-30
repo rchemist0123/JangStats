@@ -2,7 +2,7 @@
 % Please edit documentation in R/lrMultTable.R
 \name{lrMultTable}
 \alias{lrMultTable}
-\title{Multivariable Logistic regression}
+\title{Multivariable Logistic regression table}
 \usage{
 lrMultTable(data, y, Xs)
 }

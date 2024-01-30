@@ -1,4 +1,4 @@
-#' Multivariable Logistic regression
+#' Multivariable Logistic regression table
 #'
 #' Perform a multivariable logistic regression for numerous variables and create a table
 #' @param data A data for analysis
@@ -6,8 +6,7 @@
 #' @param Xs Names of independent variables or response variables
 #' @return A table of multivaraible regression about independent variables included in this analysis
 #' @importFrom stats as.formula binomial confint.default glm
-#' @importFrom gt gt tab_style cell_fill cells_body
-#' @importFrom DescTools StrAlign
+#' @importFrom gt gt tab_style cell_fill cells_body cols_label md
 #' @examples
 #' # example code
 #' lrMultTable(mtcars, 'am', c('mpg','cyl','disp','hp','wt'))

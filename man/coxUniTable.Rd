@@ -2,7 +2,7 @@
 % Please edit documentation in R/coxUniTable.R
 \name{coxUniTable}
 \alias{coxUniTable}
-\title{Univariable Cox regression}
+\title{Univariable Cox regression table}
 \usage{
 coxUniTable(data, y, time, Xs)
 }

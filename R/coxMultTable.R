@@ -8,8 +8,7 @@
 #' @return A table of mutlivariable Cox regression about independent variables included in this analysis.
 #' @importFrom stats as.formula confint.default
 #' @importFrom survival coxph Surv
-#' @importFrom gt gt tab_style cell_fill cells_body
-#' @importFrom DescTools StrAlign
+#' @importFrom gt gt tab_style cell_fill cells_body cols_label md
 #' @export
 coxMultTable = function(data, y, time,  Xs) {
   if (y %in% Xs) {
