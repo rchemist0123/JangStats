@@ -20,7 +20,7 @@ coxTableCombine = function(uni_tbl, mult_tbl){
     ) |>
     data_color(
       columns = ends_with(".x"),
-      rows = df$p.x < 0.05,
+      rows = df$p.x < 0.2,
       palette = c("lightyellow")
     ) |>
     data_color(
