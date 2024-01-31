@@ -4,7 +4,7 @@
 \alias{varMissTable}
 \title{Missing count, proportion variables table}
 \usage{
-varMissTable(data, include = NA)
+varMissTable(data, include = NULL)
 }
 \arguments{
 \item{data}{A data for the table}

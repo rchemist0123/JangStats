@@ -6,8 +6,8 @@
 #' @importFrom data.table as.data.table .SD melt dcast setorderv
 #' @importFrom gt gt tab_header
 #' @export
-varMissTable = function(data, include=NA){
-  if(!is.na(include)){
+varMissTable = function(data, include=NULL){
+  if(length(include) > 0){
     x_n = as.data.table(data)[,lapply(.SD, \(x) sum(is.na(x))),.SDcols = include]
     x_rate = as.data.table(data)[,lapply(.SD, \(x) sum(is.na(x))/nrow(data)*100),.SDcols=include]
   } else {
