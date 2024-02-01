@@ -2,11 +2,12 @@
 #'
 #' Create a baseline characteristic table by group variable
 #' @param data A data for analysis.
-#' @param include Variables including in the table.
-#' @param by A categorical variable for group
+#' @param by A categorical variable for group.
 #' @param time_vars time related variables, which are shown as a median(IQR)
+#' @param include Variables including in the table. All columns in the data as default.
 #' @return A baseline characteristics table with p-value
 #' @importFrom gtsummary tbl_summary add_p add_overall all_continuous all_categorical modify_header style_pvalue
+#' @importFrom gt everything
 #' @importFrom dplyr all_of
 #' @examples
 #' # example code
@@ -15,7 +16,7 @@
 #'     by="cyl")
 #' @export
 #'
-baseTable = function(data, include, by = NULL, time_vars=NULL) {
+baseTable = function(data, by = NULL, time_vars=NULL, include=everything()) {
   tbl = tbl_summary(
     data = data,
     by = by,
@@ -31,13 +32,13 @@ baseTable = function(data, include, by = NULL, time_vars=NULL) {
     ),
     missing = "no"
   ) |>
-    add_overall() |>
-    modify_header(label = "**Variable**", p.value = "**P**")
+    modify_header(label = "**Variable**")
 
   if(!is.null(by)){
     tbl = tbl |>
-      add_p(pvalue_fun = ~style_pvalue(., digits=3)
-            )
+      add_overall() |>
+      add_p(pvalue_fun = ~style_pvalue(., digits=3)) |>
+      modify_header(p.value = "**P**")
   }
   return(tbl)
 }

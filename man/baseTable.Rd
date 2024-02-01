@@ -4,16 +4,16 @@
 \alias{baseTable}
 \title{Baseline characteristics table}
 \usage{
-baseTable(data, include, by = NULL, time_vars = NULL)
+baseTable(data, by = NULL, time_vars = NULL, include = everything())
 }
 \arguments{
 \item{data}{A data for analysis.}
 
-\item{include}{Variables including in the table.}
-
-\item{by}{A categorical variable for group}
+\item{by}{A categorical variable for group.}
 
 \item{time_vars}{time related variables, which are shown as a median(IQR)}
+
+\item{include}{Variables including in the table. All columns in the data as default.}
 }
 \value{
 A baseline characteristics table with p-value
