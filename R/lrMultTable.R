@@ -4,7 +4,7 @@
 #' @param data A data for analysis
 #' @param y Name of a dependent variable or an outcome variable
 #' @param Xs Names of independent variables or response variables
-#' @return A table of multivaraible regression about independent variables included in this analysis
+#' @return A table of multivariable regression about independent variables included in this analysis
 #' @importFrom stats as.formula binomial confint.default glm
 #' @importFrom gt gt tab_style cell_fill cells_body cols_label md
 #' @examples

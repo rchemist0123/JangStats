@@ -16,5 +16,5 @@ Create a table that checks the n, proportion of missing values of variables
 }
 \examples{
 # example code
-varMisstable(airquality)
+varMissTable(airquality)
 }

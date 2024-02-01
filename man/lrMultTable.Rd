@@ -14,7 +14,7 @@ lrMultTable(data, y, Xs)
 \item{Xs}{Names of independent variables or response variables}
 }
 \value{
-A table of multivaraible regression about independent variables included in this analysis
+A table of multivariable regression about independent variables included in this analysis
 }
 \description{
 Perform a multivariable logistic regression for numerous variables and create a table

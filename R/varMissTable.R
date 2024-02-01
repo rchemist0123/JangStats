@@ -7,11 +7,11 @@
 #' @importFrom gt gt tab_header
 #' @examples
 #' # example code
-#' varMisstable(airquality)
+#' varMissTable(airquality)
 #' @export
-varMissTable = function(data, include=NULL){
-  stopifnot("The data must be a object of data.frame, tbl_df, or data.table class." =
-              (class(data) %in% c("data.frame")))
+varMissTable = function(data, include=NULL) {
+  stopifnot("The data must be one of data.frame, tbl_df, or data.table." =
+              (class(data)[1] %in% c("data.frame","tbl_df","data.table")))
   if(length(include) > 0){
     x_n = as.data.table(data)[,lapply(.SD, \(x) sum(is.na(x))),.SDcols = include]
     x_rate = as.data.table(data)[,lapply(.SD, \(x) sum(is.na(x))/nrow(data)*100),.SDcols=include]
