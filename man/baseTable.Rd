@@ -4,19 +4,33 @@
 \alias{baseTable}
 \title{Baseline characteristics table}
 \usage{
-baseTable(data, by = NULL, time_vars = NULL, include = everything())
+baseTable(
+  data,
+  by = NULL,
+  include = NULL,
+  time.vars = NULL,
+  row.groups = NULL,
+  by.order = NULL,
+  digits = 1L
+)
 }
 \arguments{
 \item{data}{A data for analysis.}
 
-\item{by}{A categorical variable for group.}
+\item{by}{A categorical variable for calculating by group. If NULL, all of the data would be aggregated.}
 
-\item{time_vars}{time related variables, which are shown as a median(IQR)}
+\item{include}{Variables including in the table. If NULL, all variables in the data would be included.}
 
-\item{include}{Variables including in the table. All columns in the data as default.}
+\item{time.vars}{time related variables, which are shown as a median(IQR)}
+
+\item{row.groups}{A group for clinical category. Must be a list with group names of categories and row numbers.}
+
+\item{by.order}{The order of character variable using in `by`. Must be a vector.}
+
+\item{digits}{Digits of result values. Default as 1.}
 }
 \value{
-A baseline characteristics table with p-value
+A baseline characteristics table.
 }
 \description{
 Create a baseline characteristic table by group variable
@@ -24,6 +38,7 @@ Create a baseline characteristic table by group variable
 \examples{
 # example code
 baseTable(mtcars,
-    include = c("mpg", "am","hp","drat","wt","gear","qsec", "disp","cyl"),
-    by="cyl")
+ by="cyl",
+ include = c("mpg", "am","hp","drat","wt","gear","qsec", "disp"),
+   )
 }
