@@ -39,6 +39,6 @@ Create a baseline characteristic table by group variable
 # example code
 baseTable(mtcars,
  by="cyl",
- include = c("mpg", "am","hp","drat","wt","gear","qsec", "disp"),
-   )
+ include = c("mpg", "am","hp","drat","wt","gear","qsec", "disp")
+ )
 }

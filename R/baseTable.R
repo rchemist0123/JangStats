@@ -16,8 +16,8 @@
 #' # example code
 #' baseTable(mtcars,
 #'  by="cyl",
-#'  include = c("mpg", "am","hp","drat","wt","gear","qsec", "disp"),
-#'    )
+#'  include = c("mpg", "am","hp","drat","wt","gear","qsec", "disp")
+#'  )
 #' @export
 baseTable = function(data, by = NULL, include = NULL, time.vars = NULL,
                 row.groups = NULL, by.order = NULL,  digits = 1L){
