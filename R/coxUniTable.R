@@ -4,14 +4,16 @@
 #' @param data A data for analysis
 #' @param y Name of a dependent variable or an outcome variable. Should be comprised of 0 and 1.
 #' @param time A time variable, that is observation duration for the outcome in a survival model.
-#' @param Xs Names of independent variables or response variables.
+#' @param vars Names of independent variables or response variables.
+#' @param digits Digits of result values. Default as 2.
+#' @param p.digits Digits of p-value. Default as 4.
 #' @return A table of univariable Cox regression about independent variables included in this analysis.
 #' @importFrom stats as.formula confint.default
 #' @importFrom survival coxph Surv
 #' @importFrom gt gt tab_style cell_fill cells_body cols_label md
 #' @export
-coxUniTable = function(data, y, time,  Xs) {
-  result = lapply(Xs,
+coxUniTable = function(data, y, time,  vars, digits=2, p.digits=4) {
+  result = lapply(vars,
                   \(x){
                     form = paste0("Surv(",time, y,'==1)~' ,x) |> as.formula()
                     fit = coxph(form, data = data)
@@ -20,10 +22,10 @@ coxUniTable = function(data, y, time,  Xs) {
                     p = coef(summary(fit))[-1,4]
                     data.frame(
                       variable = x,
-                      HR_ci = paste0(format(round(coef,2),nsmall=2), ' (',
-                                     format(round(confint[1],2),nsmall=2),'-',
-                                     format(round(confint[2],2),nsmall=2),")"),
-                      p = format(round(p,4),nsmall=4)
+                      HR_ci = paste0(format(round(coef,digits),nsmall=digits), ' (',
+                                     format(round(confint[1],digits),nsmall=digits),'-',
+                                     format(round(confint[2],2),nsmall=digits),")"),
+                      p = format(round(p,p.digits),nsmall=p.digits)
                     )
                   }
   )

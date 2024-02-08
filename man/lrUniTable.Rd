@@ -4,14 +4,18 @@
 \alias{lrUniTable}
 \title{Univariable Logistic regression table}
 \usage{
-lrUniTable(data, y, Xs)
+lrUniTable(data, y, vars, digits = 2, p.digits = 4)
 }
 \arguments{
 \item{data}{A data for analysis}
 
-\item{y}{Name of a dependent variable or an outcome variable}
+\item{y}{Name of a dependent variable or an outcome variable.}
 
-\item{Xs}{Names of independent variables or response variables}
+\item{vars}{Names of independent variables or response variables.}
+
+\item{digits}{Digits of result values. Default as 2.}
+
+\item{p.digits}{Digits of p-value. Default as 4.}
 }
 \value{
 A table of univariable regression about independent variables included in this analysis

@@ -4,7 +4,7 @@
 \alias{coxUniTable}
 \title{Univariable Cox regression table}
 \usage{
-coxUniTable(data, y, time, Xs)
+coxUniTable(data, y, time, vars, digits = 2, p.digits = 4)
 }
 \arguments{
 \item{data}{A data for analysis}
@@ -13,7 +13,11 @@ coxUniTable(data, y, time, Xs)
 
 \item{time}{A time variable, that is observation duration for the outcome in a survival model.}
 
-\item{Xs}{Names of independent variables or response variables.}
+\item{vars}{Names of independent variables or response variables.}
+
+\item{digits}{Digits of result values. Default as 2.}
+
+\item{p.digits}{Digits of p-value. Default as 4.}
 }
 \value{
 A table of univariable Cox regression about independent variables included in this analysis.
