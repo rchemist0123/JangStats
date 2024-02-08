@@ -31,7 +31,6 @@ baseTable = function(data, by = NULL, include = NULL, time.vars = NULL,
 
   if(!is.null(by) && !by %in% names(data)) stop(gettextf("%s not found in data.", sQuote(by)))
   if(!is.null(by) & is.null(by.order)) by.order = levels(factor(data[[by]]))
-  # stopifnot("row.groups must be a list with key and values." = !is.is.list(row.groups))
   stopifnot("digits must be numeric class" = is.numeric(digits))
   n_tbl = data[, .N, by=by][['N']] # Number of category
 
@@ -42,7 +41,7 @@ baseTable = function(data, by = NULL, include = NULL, time.vars = NULL,
     if(class(data[[x]]) %in% c("character","factor") |
        .x_level < 5 ) {
       # Total
-      tab1 = data[,.N, keyby = x][, "n_prop" := paste0(.N," (", round(.N/sum(.N)*100,1),")")][,c(x,"n_prop"),with=F]
+      tab1 = data[,.N, keyby = x] |> _[, "n_prop" := paste0(get("N")," (", round(get("N")/sum(get("N"))*100,1),")")][,c(x,"n_prop"),with=F]
       colname_row = data.table(x,"") |> setnames(c('x','V2'),c(x,'n_prop'))
       cat_tbl = rbindlist(list(colname_row, tab1))
 
@@ -52,7 +51,7 @@ baseTable = function(data, by = NULL, include = NULL, time.vars = NULL,
       if(!is.null(by)){
         .by_level = length(unique(data[[by]]))
         data[[by]] = factor(data[[by]], levels = by.order)
-        tab1 = data[,.N, keyby=c(by, x)][,"n_prop" := paste0(.N," (", round(.N/sum(.N)*100,1),")"), by=by][,c(by,x,"n_prop"),with=F]
+        tab1 = data[,.N, keyby=c(by, x)] |> _[,"n_prop" := paste0(get("N")," (", round(get("N")/sum(get("N"))*100,1),")"), by=by][,c(by,x,"n_prop"),with=F]
         cat_tbl = dcast(tab1,
                      formula = paste0(c(by,x), collapse = "~"),
                      value.var="n_prop",
@@ -111,8 +110,7 @@ baseTable = function(data, by = NULL, include = NULL, time.vars = NULL,
         setnames(cont_tbl,
                  old = names(cont_tbl)[(ncol(cont_tbl)-.by_level+1):ncol(cont_tbl)],
                  new = paste0(names(cont_tbl)[(ncol(cont_tbl)-.by_level+1):ncol(cont_tbl)],
-                              paste0(" (n=", n_tbl,")"))
-                 )
+                              paste0(" (n=", n_tbl,")")))
 
         .pval_form = paste0(x,"~",by) |> as.formula()
         if(.by_level >= 3) pval = anova(lm(.pval_form, data))[["Pr(>F)"]] |> _[1]
@@ -125,21 +123,31 @@ baseTable = function(data, by = NULL, include = NULL, time.vars = NULL,
     }
   })
   result = tbls |>
-    rbindlist(use.names = T) |>
-    gt(rowname_col = T, rownames_to_stub = T) |>
-    cols_align(align = "center", columns = !"variable") |>
+    rbindlist(use.names = T)
+  if(!is.null(row.groups)){
+    tbls_split = lapply(names(row.groups), \(x) {
+      if(nrow(result) < row.groups[[x]][1]) {} # only if by in includes
+      else {
+        temp = result[row.groups[[x]],]; col_len = length(names(temp))
+        colnum = ncol(temp)
+        blank_row = matrix(rep("", col_len), ncol=col_len) |> as.data.table()
+        setnames(blank_row, names(blank_row), names(temp))
+        temp2 = rbind(blank_row, temp)
+        temp2[['category']] = c(x, rep("", length(row.groups[[x]])))
+        setcolorder(temp2, "category", before=1)
+      }
+    })
+    result = rbindlist(tbls_split)
+  } else {
+    result
+  }
+  result = result |>
+    gt(rowname_col = T) |>
+    cols_align(align = "center", columns = names(result)[ncol(result)]) |>
     tab_style(
       style = cell_text(weight = "bold"),
       locations = gt::cells_column_labels()
     )
-
-  if(!is.null(row.groups)){
-    for(i in names(row.groups)){
-      result = result |> tab_row_group(label = i, rows = row.groups[[i]])
-    }
-    result = result |>
-      row_group_order(groups = c(names(row.groups)))
-  }
 
   if(is.null(by)){
     result = result |>
