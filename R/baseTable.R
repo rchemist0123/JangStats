@@ -5,6 +5,7 @@
 #' @param by A categorical variable for calculating by group. If NULL, all of the data would be aggregated.
 #' @param include Variables including in the table. If NULL, all variables in the data would be included.
 #' @param time.vars time related variables, which are shown as a median(IQR)
+#' @param binary.vars Variables having two categories. These variables will show N(%) of the last category.
 #' @param row.groups A group for clinical category. Must be a list with group names of categories and row numbers.
 #' @param by.order The order of character variable using in `by`. Must be a vector.
 #' @param digits Digits of result values. Default as 1.
@@ -20,6 +21,7 @@
 #'  )
 #' @export
 baseTable = function(data, by = NULL, include = NULL, time.vars = NULL,
+                     binary.vars = NULL,
                 row.groups = NULL, by.order = NULL,  digits = 1L){
   if(!is.data.table(data)) data = setDT(copy(data))
   else data = copy(data)
@@ -32,21 +34,28 @@ baseTable = function(data, by = NULL, include = NULL, time.vars = NULL,
   if(!is.null(by) && !by %in% names(data)) stop(gettextf("%s not found in data.", sQuote(by)))
   if(!is.null(by) & is.null(by.order)) by.order = levels(factor(data[[by]]))
   stopifnot("digits must be numeric class" = is.numeric(digits))
-  n_tbl = data[, .N, by=by][['N']] # Number of category
+  n_value = data[, .N, by=by][['N']] # Number of category
 
+  # TODO 변수 정렬
   tbls = lapply(include, \(x){
     .x_level = length(unique(data[[x]]))
 
     # Categorical variables
-    if(class(data[[x]]) %in% c("character","factor") |
-       .x_level < 5 ) {
-      # Total
+    if(class(data[[x]]) %in% c("character","factor") | .x_level < 5 ) {
+
       tab1 = data[,.N, keyby = x] |> _[, "n_prop" := paste0(get("N")," (", round(get("N")/sum(get("N"))*100,1),")")][,c(x,"n_prop"),with=F]
       colname_row = data.table(x,"") |> setnames(c('x','V2'),c(x,'n_prop'))
       cat_tbl = rbindlist(list(colname_row, tab1))
 
+      if(x %in% binary.vars){
+        tab1_1 = tab1[nrow(tab1),]
+        cat_tbl = data.table(
+          name = paste0(colname_row[[x]],": ",tab1_1[[x]]),
+          n_prop = tab1_1[["n_prop"]]
+        ) |> setnames(c("name"),x)
+      }
       cat_tbl_total = cat_tbl |>
-        setnames(c(x,"n_prop"), c("variable", paste0("total",' (n=',nrow(data),')')))
+        setnames(c(x,"n_prop"), c("variable", paste0("total",' (n=',sprintf("%s", format(nrow(data),big.mark=",")),')')))
 
       if(!is.null(by)){
         .by_level = length(unique(data[[by]]))
@@ -55,15 +64,21 @@ baseTable = function(data, by = NULL, include = NULL, time.vars = NULL,
         cat_tbl = dcast(tab1,
                      formula = paste0(c(by,x), collapse = "~"),
                      value.var="n_prop",
-                     fill = "0 (0.0)") |>
-          set(j = x, value="") |>
-          setcolorder(x, after = 1) |>
-          transpose(make.names = 1, keep.names = "variable")
-        # set(j = "variable", value = x)setcolorder("variable", before=1)
+                     fill = "0 (0.0)")
+        if(x %in% binary.vars){
+          setnames(cat_tbl, names(cat_tbl)[length(cat_tbl)], paste0(x,": ", names(cat_tbl)[length(cat_tbl)]))
+          cat_tbl = cat_tbl[,c(1, length(cat_tbl)),with=F] |>
+            transpose(make.names = 1, keep.names = "variable")
+        } else {
+          cat_tbl = cat_tbl |>
+            set(j = x, value="") |>
+            setcolorder(x, after = 1) |>
+            transpose(make.names = 1, keep.names = "variable")
+        }
         setnames(cat_tbl,
                  old = names(cat_tbl)[(ncol(cat_tbl)-.by_level+1):ncol(cat_tbl)],
                  new = paste0(names(cat_tbl)[(ncol(cat_tbl)-.by_level+1):ncol(cat_tbl)],
-                              paste0(" (n=", n_tbl,")")))
+                              paste0(" (n=", n_value,")")))
         .cat_mat = data[,table(mget(c(x,by)))]
         if (length(.cat_mat[.cat_mat<5])>2) pval = data[,fisher.test(get(by), get(x))][['p.value']]
         else pval = .cat_mat |> chisq.test() |> _[['p.value']]
@@ -91,7 +106,7 @@ baseTable = function(data, by = NULL, include = NULL, time.vars = NULL,
       cont_tbl_total = cont_tbl_total |>
         set(j = "variable", value = x) |>
         setcolorder("variable",before = 1) |>
-        setnames(old = x, new = paste0("total",' (n=',nrow(data),')'))
+        setnames(old = x, new = paste0("total",' (n=',sprintf("%s", format(nrow(data), big.mark=",")),')'))
 
       if(!is.null(by)){
         .by_level = length(unique(data[[by]]))
@@ -110,7 +125,7 @@ baseTable = function(data, by = NULL, include = NULL, time.vars = NULL,
         setnames(cont_tbl,
                  old = names(cont_tbl)[(ncol(cont_tbl)-.by_level+1):ncol(cont_tbl)],
                  new = paste0(names(cont_tbl)[(ncol(cont_tbl)-.by_level+1):ncol(cont_tbl)],
-                              paste0(" (n=", n_tbl,")")))
+                              paste0(" (n=", n_value,")")))
 
         .pval_form = paste0(x,"~",by) |> as.formula()
         if(.by_level >= 3) pval = anova(lm(.pval_form, data))[["Pr(>F)"]] |> _[1]
@@ -143,7 +158,8 @@ baseTable = function(data, by = NULL, include = NULL, time.vars = NULL,
   }
   result = result |>
     gt(rowname_col = T) |>
-    cols_align(align = "center", columns = names(result)[ncol(result)]) |>
+    cols_align(align = "center",
+               columns = names(result)[2:ncol(result)]) |>
     tab_style(
       style = cell_text(weight = "bold"),
       locations = gt::cells_column_labels()

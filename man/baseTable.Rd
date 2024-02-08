@@ -9,6 +9,7 @@ baseTable(
   by = NULL,
   include = NULL,
   time.vars = NULL,
+  binary.vars = NULL,
   row.groups = NULL,
   by.order = NULL,
   digits = 1L
@@ -22,6 +23,8 @@ baseTable(
 \item{include}{Variables including in the table. If NULL, all variables in the data would be included.}
 
 \item{time.vars}{time related variables, which are shown as a median(IQR)}
+
+\item{binary.vars}{Variables having two categories. These variables will show N(%) of the last category.}
 
 \item{row.groups}{A group for clinical category. Must be a list with group names of categories and row numbers.}
 
