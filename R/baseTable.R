@@ -85,9 +85,14 @@ baseTable = function(data, by = NULL, include = NULL, time.vars = NULL,
         ## p-value
         if (length(.cat_mat[.cat_mat<5])>2) pval = data[,fisher.test(get(by), get(x) ,simulate.p.value=TRUE )][['p.value']]
         else pval = .cat_mat |> chisq.test() |> _[['p.value']]
-        pval_tbl = data.table(name = paste0(colname_row[[x]],": ",tab1_1[[x]]),
-                              "P-value" = ifelse(pval<0.001,'<0.001', format(round(pval,3),nsmall=3))) |>
-                                setnames('name',"variable")
+        if(x %in% binary.vars) {
+          pval_tbl = data.table(name = paste0(colname_row[[x]],": ",tab1_1[[x]]),
+                                "P-value" = ifelse(pval<0.001,'<0.001', format(round(pval,3),nsmall=3))) |>
+                                  setnames('name',"variable")
+        } else {
+          pval_tbl = data.table(x, "P-value" = ifelse(pval<0.001,'<0.001', format(round(pval,3),nsmall=3))) |>
+            setnames('x',"variable")
+        }
 
         cat_tbl = merge(cat_tbl, pval_tbl, by="variable", all.x = T, sort=F)
         cat_tbl[is.na(cat_tbl)] = ""
@@ -141,8 +146,7 @@ baseTable = function(data, by = NULL, include = NULL, time.vars = NULL,
             error = function(e){
               warning(gettextf("Not enough observation in %s. Perform Wilcoxon Rank Sum test instead.", sQuote(x)))
             },
-            finally =
-              wilcox.test(.pval_form, exact=F, data=data)[['p.value']]
+            finally = assign("pval",wilcox.test(.pval_form, exact=F, data=data)[['p.value']])
           )
           }
         cont_tbl = cbind(cont_tbl, "P-value" = ifelse(pval<0.001,'<0.001', format(round(pval,3), nsmall=3)))
