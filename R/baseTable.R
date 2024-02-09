@@ -32,7 +32,7 @@ baseTable = function(data, by = NULL, include = NULL, time.vars = NULL,
   }
   if(!is.null(by) && !by %in% names(data)) stop(gettextf("%s not found in data.", sQuote(by)))
   if(!is.null(by) & is.null(by.order)) by.order = levels(factor(data[[by]]))
-  if(is.na(data[[by]])) {
+  if(any(is.na(data[[by]]))) {
     warning(gettextf("Missing values exist on group variable %s, NA are excluded.",sQuote(by)))
     data = data[!is.na(by)]
     }
