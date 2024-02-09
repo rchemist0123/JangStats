@@ -57,7 +57,7 @@ baseTable = function(data, by = NULL, include = NULL, time.vars = NULL,
         ) |> setnames(c("name"),x)
       }
       cat_tbl_total = cat_tbl |>
-        setnames(c(x,"n_prop"), c("variable", paste0("total",' (n=',sprintf("%s", format(nrow(data),big.mark=",")),')')))
+        setnames(c(x,"n_prop"), c("variable", paste0("total",' (n=',format(nrow(data),big.mark=","),')')))
 
       if(!is.null(by)){
         .by_level = length(unique(data[[by]]))
@@ -139,8 +139,7 @@ baseTable = function(data, by = NULL, include = NULL, time.vars = NULL,
           tryCatch(
             pval = t.test(.pval_form, data)[['p.value']],
             error = function(e){
-              warning(gettextf("Not enough observation in %s. Perform Wilcoxon Rank Sum test instead."),
-                      sQuote(x))
+              warning(gettextf("Not enough observation in %s. Perform Wilcoxon Rank Sum test instead.", sQuote(x)))
             },
             finally =
               wilcox.test(.pval_form, exact=F, data=data)[['p.value']]
