@@ -30,19 +30,21 @@ baseTable = function(data, by = NULL, include = NULL, time.vars = NULL,
     include = setdiff(include, by)
     warning(gettextf("Group variable %s in include variables, excluded.", sQuote(by)))
   }
-
   if(!is.null(by) && !by %in% names(data)) stop(gettextf("%s not found in data.", sQuote(by)))
   if(!is.null(by) & is.null(by.order)) by.order = levels(factor(data[[by]]))
+  if(is.na(data[[by]])) {
+    warning(gettextf("Missing values exist on group variable %s, NA are excluded.",sQuote(by)))
+    data = data[!is.na(by)]
+    }
   stopifnot("digits must be numeric class" = is.numeric(digits))
   n_value = data[, .N, by=by][['N']] # Number of category
 
-  # TODO 변수 정렬
+  # TODO by count n수 format 필요
   tbls = lapply(include, \(x){
     .x_level = length(unique(data[[x]]))
 
     # Categorical variables
-    if(class(data[[x]]) %in% c("character","factor") | .x_level < 5 ) {
-
+    if(class(data[[x]])[1] %in% c("character","factor","ordered") | .x_level < 5 ) {
       tab1 = data[,.N, keyby = x] |> _[, "n_prop" := paste0(get("N")," (", round(get("N")/sum(get("N"))*100,1),")")][,c(x,"n_prop"),with=F]
       colname_row = data.table(x,"") |> setnames(c('x','V2'),c(x,'n_prop'))
       cat_tbl = rbindlist(list(colname_row, tab1))
@@ -78,14 +80,18 @@ baseTable = function(data, by = NULL, include = NULL, time.vars = NULL,
         setnames(cat_tbl,
                  old = names(cat_tbl)[(ncol(cat_tbl)-.by_level+1):ncol(cat_tbl)],
                  new = paste0(names(cat_tbl)[(ncol(cat_tbl)-.by_level+1):ncol(cat_tbl)],
-                              paste0(" (n=", n_value,")")))
+                              paste0(" (n=", format(n_value, big.mark=","),")")))
         .cat_mat = data[,table(mget(c(x,by)))]
-        if (length(.cat_mat[.cat_mat<5])>2) pval = data[,fisher.test(get(by), get(x))][['p.value']]
+        ## p-value
+        if (length(.cat_mat[.cat_mat<5])>2) pval = data[,fisher.test(get(by), get(x) ,simulate.p.value=TRUE )][['p.value']]
         else pval = .cat_mat |> chisq.test() |> _[['p.value']]
-        pval_tbl = data.table(x = x,  "P-value" = ifelse(pval<0.001,'<0.001', format(round(pval,3),nsmall=3))) |>
-                                setnames('x',"variable")
+        pval_tbl = data.table(name = paste0(colname_row[[x]],": ",tab1_1[[x]]),
+                              "P-value" = ifelse(pval<0.001,'<0.001', format(round(pval,3),nsmall=3))) |>
+                                setnames('name',"variable")
+
         cat_tbl = merge(cat_tbl, pval_tbl, by="variable", all.x = T, sort=F)
         cat_tbl[is.na(cat_tbl)] = ""
+
         cat_tbl_final = merge(cat_tbl_total, cat_tbl, by="variable", sort=F)
       } else {
         cat_tbl_total
@@ -125,11 +131,21 @@ baseTable = function(data, by = NULL, include = NULL, time.vars = NULL,
         setnames(cont_tbl,
                  old = names(cont_tbl)[(ncol(cont_tbl)-.by_level+1):ncol(cont_tbl)],
                  new = paste0(names(cont_tbl)[(ncol(cont_tbl)-.by_level+1):ncol(cont_tbl)],
-                              paste0(" (n=", n_value,")")))
+                              paste0(" (n=", format(n_value, big.mark=","),")")))
 
         .pval_form = paste0(x,"~",by) |> as.formula()
         if(.by_level >= 3) pval = anova(lm(.pval_form, data))[["Pr(>F)"]] |> _[1]
-        else pval = t.test(.pval_form, data)[['p.value']]
+        else {
+          tryCatch(
+            pval = t.test(.pval_form, data)[['p.value']],
+            error = function(e){
+              warning(gettextf("Not enough observation in %s. Perform Wilcoxon Rank Sum test instead."),
+                      sQuote(x))
+            },
+            finally =
+              wilcox.test(.pval_form, exact=F, data=data)[['p.value']]
+          )
+          }
         cont_tbl = cbind(cont_tbl, "P-value" = ifelse(pval<0.001,'<0.001', format(round(pval,3), nsmall=3)))
         cont_tbl_final = merge(cont_tbl_total, cont_tbl, by="variable")
       } else {
