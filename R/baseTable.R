@@ -142,7 +142,7 @@ baseTable = function(data, by = NULL, include = NULL, time.vars = NULL,
         if(.by_level >= 3) pval = anova(lm(.pval_form, data))[["Pr(>F)"]] |> _[1]
         else {
           tryCatch(
-            pval = t.test(.pval_form, data)[['p.value']],
+            assign("pval", t.test(.pval_form, data)[['p.value']]),
             error = function(e){
               warning(gettextf("Not enough observation in %s. Perform Wilcoxon Rank Sum test instead.", sQuote(x)))
             },
