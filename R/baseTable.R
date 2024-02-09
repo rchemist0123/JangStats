@@ -112,7 +112,7 @@ baseTable = function(data, by = NULL, include = NULL, time.vars = NULL,
       cont_tbl_total = cont_tbl_total |>
         set(j = "variable", value = x) |>
         setcolorder("variable",before = 1) |>
-        setnames(old = x, new = paste0("total",' (n=',sprintf("%s", format(nrow(data), big.mark=",")),')'))
+        setnames(old = x, new = paste0("total",' (n=',format(nrow(data), big.mark=","),')'))
 
       if(!is.null(by)){
         .by_level = length(unique(data[[by]]))
