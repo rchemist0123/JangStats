@@ -15,7 +15,7 @@
 coxUniTable = function(data, y, time,  vars, digits=2, p.digits=4) {
   result = lapply(vars,
                   \(x){
-                    form = paste0("Surv(",time, y,'==1)~' ,x) |> as.formula()
+                    form = paste0("Surv(",time,"~", y,'==1)~' ,x) |> as.formula()
                     fit = coxph(form, data = data)
                     coef = exp(coef(fit))[-1]
                     confint = exp(confint.default(fit)[2,])

@@ -18,7 +18,7 @@ coxMultTable = function(data, y, time,  vars, digits, p.digits) {
         y,"was excluded.\n")
     vars = setdiff(vars,y)
   }
-  form = paste0("Surv(",time, y,'==1)~' , vars) |> as.formula()
+  form = paste0("Surv(",time, "~", y,'==1)~' , vars) |> as.formula()
   fit = coxph(form, data = data)
   coef = exp(coef(fit))[-1]
   confint = exp(confint.default(fit)[2,])
