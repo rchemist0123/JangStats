@@ -1,6 +1,6 @@
-# JangTables
+# JangTable
 
-Functions for efficient clinical data analyses and tables
+Functions for efficient clinical data analyses and tables. Various table functions are included for time-saving tables production.
 
 ## Lists of tables available
 
