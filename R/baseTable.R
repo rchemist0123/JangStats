@@ -4,7 +4,7 @@
 #' @param data A data for analysis.
 #' @param by A categorical variable for calculating by group. If NULL, all of the data would be aggregated.
 #' @param include Variables including in the table. If NULL, all variables in the data would be included.
-#' @param time.vars time related variables, which are shown as a median(IQR)
+#' @param median.vars Variables aggregated to median and IQR.
 #' @param binary.vars Variables having two categories. These variables will show N(%) of the last category.
 #' @param row.groups A group for clinical category. Must be a list with group names of categories and row numbers.
 #' @param by.order The order of character variable using in `by`. Must be a vector.
@@ -20,7 +20,7 @@
 #'  include = c("mpg", "am","hp","drat","wt","gear","qsec", "disp")
 #'  )
 #' @export
-baseTable = function(data, by = NULL, include = NULL, time.vars = NULL,
+baseTable = function(data, by = NULL, include = NULL, median.vars = NULL,
                      binary.vars = NULL,
                 row.groups = NULL, by.order = NULL,  digits = 1L){
   if(!is.data.table(data)) data = setDT(copy(data))
@@ -37,9 +37,8 @@ baseTable = function(data, by = NULL, include = NULL, time.vars = NULL,
     data = data[!is.na(by)]
     }
   stopifnot("digits must be numeric class" = is.numeric(digits))
-  n_value = data[, .N, by=by][['N']] # Number of category
+  n_value = table(factor(data[[by]], levels=by.order)) # Number of category
 
-  # TODO by count n수 format 필요
   tbls = lapply(include, \(x){
     .x_level = length(unique(data[[x]]))
 
@@ -103,7 +102,7 @@ baseTable = function(data, by = NULL, include = NULL, time.vars = NULL,
       }
     } else {
       # Continuous variables
-      if(x %in% time.vars){
+      if(x %in% median.vars){
         cont_tbl_total = data[,lapply(.SD, \(x) paste0(
                             format(round(median(x, na.rm=T), digits), nsmall=digits), " [",
                             format(round(quantile(x, probs=.25, na.rm=T), digits), nsmall=digits), '-',
@@ -122,7 +121,7 @@ baseTable = function(data, by = NULL, include = NULL, time.vars = NULL,
       if(!is.null(by)){
         .by_level = length(unique(data[[by]]))
         data[[by]] = factor(data[[by]], levels = by.order)
-        if(x %in% time.vars){
+        if(x %in% median.vars){
           cont_tbl = data[,lapply(.SD, \(x) paste0(
             format(round(median(x, na.rm=T), digits), nsmall=digits), " [",
             format(round(quantile(x, probs=.25, na.rm=T), digits), nsmall=digits),'-',
@@ -141,13 +140,17 @@ baseTable = function(data, by = NULL, include = NULL, time.vars = NULL,
         .pval_form = paste0(x,"~",by) |> as.formula()
         if(.by_level >= 3) pval = anova(lm(.pval_form, data))[["Pr(>F)"]] |> _[1]
         else {
-          tryCatch(
-            assign("pval", t.test(.pval_form, data)[['p.value']]),
-            error = function(e){
-              warning(gettextf("Not enough observation in %s. Perform Wilcoxon Rank Sum test instead.", sQuote(x)))
-            },
-            finally = assign("pval",wilcox.test(.pval_form, exact=F, data=data)[['p.value']])
-          )
+          if(x %in% median.vars){
+            pval = wilcox.test(.pval_form, exact=F, data)[['p.value']]
+          } else {
+            tryCatch(
+              assign("pval", t.test(.pval_form, data)[['p.value']]),
+              error = function(e){
+                warning(gettextf("Not enough observation in %s. Perform Wilcoxon Rank Sum test instead.", sQuote(x)))
+              },
+              finally = assign("pval", wilcox.test(.pval_form, exact=F, data=data)[['p.value']])
+            )
+          }
           }
         cont_tbl = cbind(cont_tbl, "P-value" = ifelse(pval<0.001,'<0.001', format(round(pval,3), nsmall=3)))
         cont_tbl_final = merge(cont_tbl_total, cont_tbl, by="variable")
