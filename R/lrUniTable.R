@@ -7,9 +7,8 @@
 #' @param digits Digits of result values. Default as 2.
 #' @param p.digits Digits of p-value. Default as 4.
 #' @return A table of univariable regression about independent variables included in this analysis
-#' @importFrom stats as.formula binomial confint.default glm
+#' @importFrom stats as.formula binomial coef confint.default glm
 #' @importFrom gt gt tab_style cell_fill cells_body cols_label md
-#' @importFrom DescTools StrAlign
 #' @examples
 #' # example code
 #' lrUniTable(mtcars, 'am', c('mpg','cyl','disp','hp','wt'))

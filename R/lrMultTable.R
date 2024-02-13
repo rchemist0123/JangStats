@@ -7,7 +7,7 @@
 #' @param digits Digits of result values. Default as 2.
 #' @param p.digits Digits of p-value. Default as 4.
 #' @return A table of multivariable regression about independent variables included in this analysis
-#' @importFrom stats as.formula binomial confint.default glm
+#' @importFrom stats as.formula binomial confint.default glm coef
 #' @importFrom gt gt tab_style cell_fill cells_body cols_label md
 #' @examples
 #' # example code
@@ -22,11 +22,11 @@ lrMultTable = function(data, y, vars, digits=2, p.digits=4) {
   form = paste0(y, "~", paste0(vars, collapse="+")) |> as.formula()
   fit = glm(form, family=binomial(), data = data)
   est = exp(coef(fit))[-1]
-  ci = exp(confint.default(fit)[2,]); print()
-  p = coef(summary(fit))[-1,4]; print(p)
+  ci = exp(confint.default(fit)[2,])
+  p = coef(summary(fit))[-1,4]
 
   result = data.frame(
-    variable = vars,
+    variable = names(coef(fit))[-1],
     OR_ci = paste0(format(round(est,digits),nsmall=digits), ' (',
                    format(round(ci[1],digits),nsmall=digits),'-',
                    format(round(ci[2],2),nsmall=digits),")"),

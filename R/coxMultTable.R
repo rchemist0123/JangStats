@@ -8,7 +8,7 @@
 #' @param digits Digits of result values. Default as 2.
 #' @param p.digits Digits of p-value. Default as 4.
 #' @return A table of mutlivariable Cox regression about independent variables included in this analysis.
-#' @importFrom stats as.formula confint.default
+#' @importFrom stats as.formula confint.default coef
 #' @importFrom survival coxph Surv
 #' @importFrom gt gt tab_style cell_fill cells_body cols_label md
 #' @export

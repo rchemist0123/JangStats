@@ -11,7 +11,7 @@
 #' @param digits Digits of result values. Default as 1.
 #' @return A baseline characteristics table.
 #' @importFrom data.table setDT copy setnames rbindlist set setcolorder transpose .N := data.table is.data.table
-#' @importFrom stats fisher.test t.test chisq.test anova lm median quantile sd
+#' @importFrom stats fisher.test t.test chisq.test anova lm median quantile sd wilcox.test
 #' @importFrom gt gt cols_align cols_label tab_style cell_text cells_column_labels tab_row_group row_group_order
 #' @examples
 #' # example code
