@@ -39,6 +39,7 @@ lrTableCombine = function(uni_tbl, mult_tbl){
                 columns = ends_with(".x")) |>
     tab_spanner(label=md("**Multivariable**"),
                 columns = ends_with(".y")
-    )
+    ) |>
+    tab_header(title=md('**Tables of Logistic regressions**'))
   return(tbl)
 }
