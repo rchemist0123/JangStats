@@ -20,7 +20,7 @@ coxMultTable = function(data, y, time,  vars, digits, p.digits) {
   }
   form = paste0("Surv(",time, ",", y,'==1)~' , vars) |> as.formula()
   fit = coxph(form, data = data)
-  coef = exp(coef(fit))[-1]
+  coef = exp(coef(fit))
   confint = exp(confint.default(fit))
   p = coef(summary(fit))[5]
 
