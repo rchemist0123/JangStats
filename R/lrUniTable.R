@@ -24,7 +24,7 @@ lrUniTable = function(data, y, vars, digits=2, p.digits=4) {
            p = coef(summary(fit))[-1,4]
            data.frame(
              variable = x,
-             OR_ci = paste0(format(round(coef,digits),nsmall=digits), ' (',
+             OR_ci = paste0(format(round(coef, digits),nsmall=digits), ' (',
                             format(round(confint[1],digits),nsmall=digits),'-',
                             format(round(confint[2],digits),nsmall=digits),")"),
              p = format(round(p,p.digits),nsmall=p.digits)

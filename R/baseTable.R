@@ -5,7 +5,7 @@
 #' @param by A categorical variable for calculating by group. If NULL, all of the data would be aggregated.
 #' @param include Variables including in the table. If NULL, all variables in the data would be included.
 #' @param median.vars Variables aggregated to median and IQR.
-#' @param binary.vars Variables having two categories. These variables will show N(%) of the last category.
+#' @param binary.vars Variables having two categories. These variables will show N and proportions of the last category.
 #' @param row.groups A group for clinical category. Must be a list with group names of categories and row numbers.
 #' @param by.order The order of character variable using in `by`. Must be a vector.
 #' @param digits Digits of result values. Default as 1.

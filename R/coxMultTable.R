@@ -20,16 +20,16 @@ coxMultTable = function(data, y, time,  vars, digits=2, p.digits=4) {
   }
   form = paste0("Surv(",time, ",", y,'==1)~' , paste0(vars, collapse = "+")) |> as.formula()
   fit = coxph(form, data = data)
-  coef = exp(coef(fit))
-  confint = exp(confint.default(fit))
-  p = coef(summary(fit))[5]
+  est = exp(coef(fit))
+  ci = exp(confint.default(fit))
+  p = coef(summary(fit))[,"Pr(>|z|)"]
 
-  result = data.frame(
-    variable = vars,
-    HR_ci = paste0(format(round(coef,digits),nsmall=digits), ' (',
-                   format(round(confint[1],digits),nsmall=digits),'-',
-                   format(round(confint[2],digits),nsmall=digits),")"),
-    p = format(round(p,p.digits),nsmall=p.digits)
+  result = data.table(
+    variable = fit |> coef() |> names(),
+    HR_ci = paste0(format(round(est, digits), nsmall=digits), ' (',
+                   format(round(ci[,1], digits), nsmall=digits),"-",
+                   format(round(ci[,2], digits), nsmall=digits),')'),
+    p = format(round(p, p.digits), nsmall=p.digits)
   )
 
   table = result |>

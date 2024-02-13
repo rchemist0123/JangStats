@@ -26,8 +26,7 @@ varMissTable = function(data, include=NULL) {
   setorderv(x_dcast, "N", -1)
   tbl = x_dcast  |>
     gt()  |>
-    tab_header(
-      title='Missing values of variables')
+    tab_header(title='Missing values of variables')
 
   return(tbl)
 }

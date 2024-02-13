@@ -24,7 +24,7 @@ baseTable(
 
 \item{median.vars}{Variables aggregated to median and IQR.}
 
-\item{binary.vars}{Variables having two categories. These variables will show N(%) of the last category.}
+\item{binary.vars}{Variables having two categories. These variables will show N and proportions of the last category.}
 
 \item{row.groups}{A group for clinical category. Must be a list with group names of categories and row numbers.}
 

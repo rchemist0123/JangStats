@@ -4,7 +4,7 @@
 \alias{coxMultTable}
 \title{Mutlivariable Cox regression table}
 \usage{
-coxMultTable(data, y, time, vars, digits, p.digits)
+coxMultTable(data, y, time, vars, digits = 2, p.digits = 4)
 }
 \arguments{
 \item{data}{A data for analysis}

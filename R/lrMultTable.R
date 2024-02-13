@@ -21,15 +21,15 @@ lrMultTable = function(data, y, vars, digits=2, p.digits=4) {
   }
   form = paste0(y, "~", paste0(vars, collapse="+")) |> as.formula()
   fit = glm(form, family=binomial(), data = data)
-  coef = exp(coef(fit))[-1]
-  confint = exp(confint.default(fit)[2,])
-  p = coef(summary(fit))[-1,4]
+  est = exp(coef(fit))[-1]
+  ci = exp(confint.default(fit)[2,]); print()
+  p = coef(summary(fit))[-1,4]; print(p)
 
   result = data.frame(
     variable = vars,
-    OR_ci = paste0(format(round(coef,digits),nsmall=digits), ' (',
-                   format(round(confint[1],digits),nsmall=digits),'-',
-                   format(round(confint[2],2),nsmall=digits),")"),
+    OR_ci = paste0(format(round(est,digits),nsmall=digits), ' (',
+                   format(round(ci[1],digits),nsmall=digits),'-',
+                   format(round(ci[2],2),nsmall=digits),")"),
     p = format(round(p, p.digits),nsmall=p.digits)
   )
 

@@ -21,7 +21,7 @@ coxUniTable = function(data, y, time,  vars, digits=2, p.digits=4) {
                     confint = exp(confint.default(fit))
                     p = coef(summary(fit))[5]
                     data.frame(
-                      variable = x,
+                      variable = fit |> coef() |> names(),
                       HR_ci = paste0(format(round(coef,digits),nsmall=digits), ' (',
                                      format(round(confint[1],digits),nsmall=digits),'-',
                                      format(round(confint[2],2),nsmall=digits),")"),
