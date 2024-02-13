@@ -1,4 +1,4 @@
-Package: JangStats
+Package: JangTable
 Type: Package
 Title: Functions for efficient clinical data analyses and tables
 Version: 0.1.0
