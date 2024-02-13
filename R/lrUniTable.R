@@ -22,7 +22,7 @@ lrUniTable = function(data, y, vars, digits=2, p.digits=4) {
            confint = exp(confint.default(fit)[2,])
            p = coef(summary(fit))[-1,4]
            data.frame(
-             variable = x,
+             variable = names(coef(fit))[-1],
              OR_ci = paste0(format(round(coef, digits),nsmall=digits), ' (',
                             format(round(confint[1],digits),nsmall=digits),'-',
                             format(round(confint[2],digits),nsmall=digits),")"),
