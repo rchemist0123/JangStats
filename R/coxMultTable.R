@@ -12,13 +12,13 @@
 #' @importFrom survival coxph Surv
 #' @importFrom gt gt tab_style cell_fill cells_body cols_label md
 #' @export
-coxMultTable = function(data, y, time,  vars, digits, p.digits) {
+coxMultTable = function(data, y, time,  vars, digits=2, p.digits=4) {
   if (y %in% vars) {
-    cat("The outcome variable",y, "included in independent variables.\n",
+    warning("The outcome variable",y, "included in independent variables.\n",
         y,"was excluded.\n")
-    vars = setdiff(vars,y)
+    vars = setdiff(vars, y)
   }
-  form = paste0("Surv(",time, ",", y,'==1)~' , vars) |> as.formula()
+  form = paste0("Surv(",time, ",", y,'==1)~' , paste0(vars, collapse = "+")) |> as.formula()
   fit = coxph(form, data = data)
   coef = exp(coef(fit))
   confint = exp(confint.default(fit))
