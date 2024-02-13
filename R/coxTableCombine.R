@@ -24,16 +24,16 @@ coxTableCombine = function(uni_tbl, mult_tbl){
       HR_ci.y = md("**HR (95% CI)**"),
       p.y = md("**P value**")
     ) |>
-    data_color(
-      columns = ends_with(".x"),
-      rows = df$p.x < 0.2,
-      palette = c("lightyellow")
-    ) |>
-    data_color(
-      columns = ends_with(".y"),
-      rows = df$p.y != "\u2014" & df$p.y < 0.05,
-      palette = c("lightyellow")
-    ) |>
+    # data_color(
+    #   columns = ends_with(".x"),
+    #   rows = df$p.x < 0.2,
+    #   palette = c("lightyellow")
+    # ) |>
+    # data_color(
+    #   columns = ends_with(".y"),
+    #   rows = df$p.y != "\u2014" & df$p.y < 0.05,
+    #   palette = c("lightyellow")
+    # ) |>
     tab_spanner(label=md("**Univariable**"),
                 columns = ends_with(".x")) |>
     tab_spanner(label=md("**Multivariable**"),
