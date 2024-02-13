@@ -1,6 +1,6 @@
 Package: JangStats
 Type: Package
-Title: Functions for efficient clinical data analyses
+Title: Functions for efficient clinical data analyses and tables
 Version: 0.1.0
 Author: Yeonhoon Jang
 Maintainer: Yeonhoon Jang <danjang0123@gmail.com>
