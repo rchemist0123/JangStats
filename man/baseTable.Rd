@@ -12,7 +12,8 @@ baseTable(
   binary.vars = NULL,
   row.groups = NULL,
   by.order = NULL,
-  digits = 1L
+  digits = 1L,
+  p.digits = 4L
 )
 }
 \arguments{
@@ -31,6 +32,8 @@ baseTable(
 \item{by.order}{The order of character variable using in `by`. Must be a vector.}
 
 \item{digits}{Digits of result values. Default as 1.}
+
+\item{p.digits}{Digits of p values. Default as 4.}
 }
 \value{
 A baseline characteristics table.
@@ -42,6 +45,7 @@ Create a baseline characteristic table by group variable
 # example code
 baseTable(mtcars,
  by="cyl",
- include = c("mpg", "am","hp","drat","wt","gear","qsec", "disp")
+ include = c("mpg", "am","hp","drat","wt","gear","qsec", "disp"),
+ binary.vars = c("vs","am")
  )
 }

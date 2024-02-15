@@ -9,6 +9,7 @@
 #' @param row.groups A group for clinical category. Must be a list with group names of categories and row numbers.
 #' @param by.order The order of character variable using in `by`. Must be a vector.
 #' @param digits Digits of result values. Default as 1.
+#' @param p.digits Digits of p values. Default as 4.
 #' @return A baseline characteristics table.
 #' @importFrom data.table setDT copy setnames rbindlist set setcolorder transpose .N := data.table is.data.table
 #' @importFrom stats fisher.test t.test chisq.test anova lm median quantile sd wilcox.test
@@ -17,27 +18,33 @@
 #' # example code
 #' baseTable(mtcars,
 #'  by="cyl",
-#'  include = c("mpg", "am","hp","drat","wt","gear","qsec", "disp")
+#'  include = c("mpg", "am","hp","drat","wt","gear","qsec", "disp"),
+#'  binary.vars = c("vs","am")
 #'  )
 #' @export
 baseTable = function(data, by = NULL, include = NULL, median.vars = NULL,
-                     binary.vars = NULL,
-                row.groups = NULL, by.order = NULL,  digits = 1L){
+                     binary.vars = NULL, row.groups = NULL, by.order = NULL,  digits = 1L, p.digits= 4L){
+
+  stopifnot("digits must be integer class" = is.numeric(digits))
+  stopifnot("p.digits must be integer class" = is.numeric(p.digits))
   if(!is.data.table(data)) data = setDT(copy(data))
   else data = copy(data)
   if(is.null(include)) include = names(data)
-  if(!is.null(by) && by %in% include) {
-    include = setdiff(include, by)
-    warning(gettextf("Group variable %s in include variables, excluded.", sQuote(by)))
-  }
-  if(!is.null(by) && !by %in% names(data)) stop(gettextf("%s not found in data.", sQuote(by)))
-  if(!is.null(by) & is.null(by.order)) by.order = levels(factor(data[[by]]))
-  if(any(is.na(data[[by]]))) {
-    warning(gettextf("Missing values exist on group variable %s, NA are excluded.",sQuote(by)))
-    data = data[!is.na(by)]
+  if(!is.null(by)){
+    if(is.null(by.order)) by.order = levels(factor(data[[by]]))
+    n_value = table(factor(data[[by]], levels=by.order)) # Number of category
+    if(by %in% include) {
+      include = setdiff(include, by)
+      warning(gettextf("Group variable %s in include variables, excluded.", sQuote(by)))
     }
-  stopifnot("digits must be numeric class" = is.numeric(digits))
-  n_value = table(factor(data[[by]], levels=by.order)) # Number of category
+    if(!by %in% names(data)) stop(gettextf("%s not found in data.", sQuote(by)))
+    if(any(is.na(data[[by]]))) {
+      warning(gettextf("Missing values exist on group variable %s, NA are excluded.",sQuote(by)))
+      data = data[!is.na(by)]
+    }
+  } else {
+    n_value = nrow(data)
+  }
 
   tbls = lapply(include, \(x){
     .x_level = length(unique(data[[x]]))
@@ -86,10 +93,10 @@ baseTable = function(data, by = NULL, include = NULL, median.vars = NULL,
         else pval = .cat_mat |> chisq.test() |> _[['p.value']]
         if(x %in% binary.vars) {
           pval_tbl = data.table(name = paste0(colname_row[[x]],": ",tab1_1[[x]]),
-                                "P-value" = ifelse(pval<0.001,'<0.001', format(round(pval,3),nsmall=3))) |>
+                                "P-value" = ifelse(pval<0.001,'<0.001', format(round(pval, p.digits),nsmall=p.digits))) |>
                                   setnames('name',"variable")
         } else {
-          pval_tbl = data.table(x, "P-value" = ifelse(pval<0.001,'<0.001', format(round(pval,3),nsmall=3))) |>
+          pval_tbl = data.table(x, "P-value" = ifelse(pval<0.001,'<0.001', format(round(pval, p.digits),nsmall=p.digits))) |>
             setnames('x',"variable")
         }
 
@@ -152,7 +159,7 @@ baseTable = function(data, by = NULL, include = NULL, median.vars = NULL,
             )
           }
           }
-        cont_tbl = cbind(cont_tbl, "P-value" = ifelse(pval<0.001,'<0.001', format(round(pval,3), nsmall=3)))
+        cont_tbl = cbind(cont_tbl, "P-value" = ifelse(pval<0.001,'<0.001', format(round(pval, p.digits), nsmall=p.digits)))
         cont_tbl_final = merge(cont_tbl_total, cont_tbl, by="variable")
       } else {
         cont_tbl_total
