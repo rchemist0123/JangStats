@@ -5,17 +5,21 @@ Functions for efficient clinical data analyses and tables. Various table functio
 ## Lists of tables available
 
 ### Descriptive tables
-- Baseline characteristics
-- Missing value count & proportions
+- `baseTable()`: Baseline characteristics 
+  - `by`: a category variable for aggregating by each categories.
+  - `include`: variables that would be displayed in the baseline characteristics table.
+  - `median.vars`: continuous variables to calculate median and IQR.
+  - `by.order`: The order of categories shown in the baseline characteristics table.
+  
+- `varMissTable()`: Missing value count & proportions
 
 ### Logistic regression tables
-- Univariable Logistic regression 
-- Multivariable Logistic regression 
-- Merged(Univariable & Multivariable) Logistic regression
+- `lrUniTable()`: Univariable Logistic regression 
+- `lrMultTable()`: Multivariable Logistic regression 
+- `lrTableCombine()`: Merged(Univariable & Multivariable) Logistic regression
 
 ### Cox regression tables
-- Univariable Cox regression 
-- Multivariable Cox regression 
-- Merged(Univariable & Multivariable) Cox regression
-
+- `coxUniTable()`: Univariable Cox regression 
+- `coxMultTable()`: Multivariable Cox regression 
+- `coxTableCombine()`: Merged(Univariable & Multivariable) Cox regression
 
