@@ -12,40 +12,43 @@
 #' @export
 subgroupTable = function(data, fit, treatment, subgroups, digits=2){
   if(inherits(fit, "coxph")) {
-    est = "hr_ci"
+    est = "HR (95% CI)"
     tbl_col = "HazardRatio"
-    header = "**HR (95% CI)**"
   }
   else if(inherits(fit,"glm")) {
-    est = "or_ci" ;
+    est = "OR (95% CI)" ;
     tbl_col = "OddsRatio"
-    header = "**OR (95% CI)**"
   }
   classes = sapply(data[,c(treatment, subgroups), with=F], class)
   if(!classes[treatment] == 'factor') data[[treatment]] = as.factor(data[[treatment]])
   for(s in subgroups){
-     if(!classes[s] == 'factor') data[[s]] = as.factor(data[[s]])
+    if(!classes[s] == 'factor') data[[s]] = as.factor(data[[s]])
   }
   stopifnot("No subgroups are provided." = length(subgroups) >0)
   tbl = subgroupAnalysis(fit,
-                   data = data,
-                   treatment = treatment,
-                   subgroups = subgroups)
+                         data = data,
+                         treatment = treatment,
+                         subgroups = subgroups)
   tbl[[est]] = paste0(format(round(tbl[['HazardRatio']],digits), nsmall=digits),
-                          ' (', format(round(tbl[['Lower']],digits), nsmall=digits), '-',
-                          format(round(tbl[['Upper']],digits), nsmall=digits),
-                          ')')
+                      ' (', format(round(tbl[['Lower']],digits), nsmall=digits), '-',
+                      format(round(tbl[['Upper']],digits), nsmall=digits),
+                      ')')
   tbl[['control']] = paste0(tbl[['event_0']],'/', tbl[['sample_0']])
   tbl[['case']] = paste0(tbl[['event_1']],'/',tbl[['sample_1']])
-
-  tbl[,c('subgroups', 'level', 'case', 'control', est, 'pinteraction')] |>
-    gt(groupname_col = "subgroups")  |>
+  tbl[,c('subgroups', 'level', 'case', 'control', eval(est), 'pinteraction')] |>
+    gt(groupname_col = "subgroups") |>
     cols_label(
-      level = md("**Subgroup**"),
-      case = md("**Case**"),
-      control = md("**Control**"),
-      starts_with(eval(est)) ~ md(header),
-      pinteraction = md("***P* for interaction**")
+      level = "**Subgroup**",
+      case = "**Case**",
+      control = "**Control**",
+      pinteraction = "***P* for interaction**",
+      .fn = md
+    ) |>
+    cols_label_with(
+      columns = contains("CI"),
+      fn = \(x) {
+        gsub("^","**", gsub("$","**",x)) |> md()
+      }
     ) |>
     fmt_number(
       columns = "pinteraction",
@@ -54,7 +57,9 @@ subgroupTable = function(data, fit, treatment, subgroups, digits=2){
     tab_style(
       style = list(cell_text(weight="bold")),
       locations = cells_row_groups()
+    ) |>
+    cols_align(
+      align = "center",
+      columns = !"level"
     )
-
-
 }
