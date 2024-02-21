@@ -23,3 +23,13 @@ Functions for efficient clinical data analyses and tables. Various table functio
 - `coxMultTable()`: Multivariable Cox regression 
 - `coxTableCombine()`: Merged(Univariable & Multivariable) Cox regression
 
+## Installation
+
+```{r}
+
+# Install a stable development version from GitHub (requires compilation)
+
+remotes::install_github("rchemist0123/JangTable")
+
+```
+
