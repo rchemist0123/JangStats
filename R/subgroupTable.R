@@ -44,7 +44,7 @@ subgroupTable = function(data, fit, treatment, subgroups, digits=2){
       level = md("**Subgroup**"),
       case = md("**Case**"),
       control = md("**Control**"),
-      starts_with(est) ~ md(header),
+      starts_with(eval(est)) ~ md(header),
       pinteraction = md("***P* for interaction**")
     ) |>
     fmt_number(
