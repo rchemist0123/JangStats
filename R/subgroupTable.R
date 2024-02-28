@@ -10,7 +10,6 @@
 #' @importFrom Publish subgroupAnalysis
 #' @importFrom gt gt tab_style cols_label cols_label_with md fmt_number cols_align cells_row_groups cell_text
 #' @export
-#' @import package
 subgroupTable = function(data, fit, treatment, subgroups, digits=2){
   if(inherits(fit, "coxph")) {
     est = "HR (95% CI)"
