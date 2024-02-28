@@ -29,7 +29,7 @@ subgroupTable = function(data, fit, treatment, subgroups, digits=2){
                          data = data,
                          treatment = treatment,
                          subgroups = subgroups)
-  tbl[[est]] = paste0(format(round(tbl[[est]],digits), nsmall=digits),
+  tbl[[est]] = paste0(format(round(tbl[[tbl_col]],digits), nsmall=digits),
                       ' (', format(round(tbl[['Lower']],digits), nsmall=digits), '-',
                       format(round(tbl[['Upper']],digits), nsmall=digits),
                       ')')
