@@ -2,7 +2,7 @@
 #'
 #' Perform univariable logistic regressions for numerous variables and create a table
 #' @param data A data for analysis
-#' @param y Name of a dependent variable or an outcome variable.
+#' @param outcome Name of a dependent variable or an outcome variable.
 #' @param vars Names of independent variables or response variables.
 #' @param digits Digits of result values. Default as 2.
 #' @param p.digits Digits of p-value. Default as 4.
@@ -13,10 +13,10 @@
 #' # example code
 #' lrUniTable(mtcars, 'am', c('mpg','cyl','disp','hp','wt'))
 #' @export
-lrUniTable = function(data, y, vars, digits=2, p.digits=4) {
+lrUniTable = function(data, outcome, vars, digits=2, p.digits=4) {
   result = lapply(vars,
          \(x){
-           form = paste0(y, "~" ,x) |> as.formula()
+           form = springf("%s ~ %s", outcome, x) |> as.formula()
            fit = glm(form, family=binomial(), data = data)
            coef = exp(coef(fit))[-1]
            confint = exp(confint.default(fit)[2,])

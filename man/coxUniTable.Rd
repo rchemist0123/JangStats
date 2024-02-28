@@ -4,12 +4,12 @@
 \alias{coxUniTable}
 \title{Univariable Cox regression table}
 \usage{
-coxUniTable(data, y, time, vars, digits = 2, p.digits = 4)
+coxUniTable(data, outcome, time, vars, digits = 2, p.digits = 4)
 }
 \arguments{
 \item{data}{A data for analysis}
 
-\item{y}{Name of a dependent variable or an outcome variable. Should be comprised of 0 and 1.}
+\item{outcome}{Name of a dependent variable or an outcome variable. Should be comprised of 0 and 1.}
 
 \item{time}{A time variable, that is observation duration for the outcome in a survival model.}
 

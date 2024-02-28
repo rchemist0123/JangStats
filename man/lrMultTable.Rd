@@ -4,12 +4,12 @@
 \alias{lrMultTable}
 \title{Multivariable Logistic regression table}
 \usage{
-lrMultTable(data, y, vars, digits = 2, p.digits = 4)
+lrMultTable(data, outcome, vars, digits = 2, p.digits = 4)
 }
 \arguments{
 \item{data}{A data for analysis}
 
-\item{y}{Name of a dependent variable or an outcome variable}
+\item{outcome}{Name of a dependent variable or an outcome variable}
 
 \item{vars}{Names of independent variables or response variables}
 

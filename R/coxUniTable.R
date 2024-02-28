@@ -2,7 +2,7 @@
 #'
 #' Perform univariable Cox regressions for numerous variables and create a table
 #' @param data A data for analysis
-#' @param y Name of a dependent variable or an outcome variable. Should be comprised of 0 and 1.
+#' @param outcome Name of a dependent variable or an outcome variable. Should be comprised of 0 and 1.
 #' @param time A time variable, that is observation duration for the outcome in a survival model.
 #' @param vars Names of independent variables or response variables.
 #' @param digits Digits of result values. Default as 2.
@@ -12,10 +12,10 @@
 #' @importFrom survival coxph Surv
 #' @importFrom gt gt tab_style cell_fill cells_body cols_label md
 #' @export
-coxUniTable = function(data, y, time,  vars, digits=2, p.digits=4) {
+coxUniTable = function(data, outcome, time,  vars, digits=2, p.digits=4) {
   result = lapply(vars,
                   \(x){
-                    form = paste0("Surv(",time,",", y,'==1)~' ,x) |> as.formula()
+                    form = sprintf("Surv(%s, %s == 1) ~ %s", time, y, x) |> as.formula()
                     fit = coxph(form, data = data)
                     coef = exp(coef(fit))
                     confint = exp(confint.default(fit))

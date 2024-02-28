@@ -2,7 +2,7 @@
 #'
 #' Perform a multivariable logistic regression for numerous variables and create a table
 #' @param data A data for analysis
-#' @param y Name of a dependent variable or an outcome variable
+#' @param outcome Name of a dependent variable or an outcome variable
 #' @param vars Names of independent variables or response variables
 #' @param digits Digits of result values. Default as 2.
 #' @param p.digits Digits of p-value. Default as 4.
@@ -13,13 +13,15 @@
 #' # example code
 #' lrMultTable(mtcars, 'am', c('mpg','cyl','disp','hp','wt'))
 #' @export
-lrMultTable = function(data, y, vars, digits=2, p.digits=4) {
-  if (y %in% vars) {
-    cat("The outcome variable",y, "included in independent variables.\n",
-        y,"was excluded.\n")
-    vars = setdiff(vars,y)
+lrMultTable = function(data, outcome, vars, digits=2, p.digits=4) {
+  if (outcome %in% vars) {
+    cat("The outcome variable",outcome, "included in independent variables.\n",
+        outcome,"was excluded.\n")
+    vars = setdiff(vars,outcome)
   }
-  form = paste0(y, "~", paste0(vars, collapse="+")) |> as.formula()
+
+  #TODO formula of multilevel
+  form = sprintf("%s ~ %s", outcome, paste0(vars, collapse="+")) |> as.formula()
   fit = glm(form, family=binomial(), data = data)
   est = exp(coef(fit))[-1]
   ci = exp(confint.default(fit)[2,])
@@ -27,9 +29,9 @@ lrMultTable = function(data, y, vars, digits=2, p.digits=4) {
 
   result = data.frame(
     variable = names(coef(fit))[-1],
-    OR_ci = paste0(format(round(est,digits),nsmall=digits), ' (',
-                   format(round(ci[1],digits),nsmall=digits),'-',
-                   format(round(ci[2],2),nsmall=digits),")"),
+    OR_ci = paste0(format(round(est,digits), nsmall=digits), ' (',
+                   format(round(ci[1],digits), nsmall=digits),'-',
+                   format(round(ci[2],2), nsmall=digits),")"),
     p = format(round(p, p.digits),nsmall=p.digits)
   )
 
