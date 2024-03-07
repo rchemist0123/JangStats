@@ -8,7 +8,7 @@
 #' @param digits Digits of result values. Default as 2.
 #' @return A table of Subgroup analysis with subgroups, level, case, control,  estimates, ci, and p interaction
 #' @importFrom Publish subgroupAnalysis
-#' @importFrom gt gt tab_style cols_label cols_label_with md fmt_number cols_align cells_row_groups cell_text
+#' @importFrom gt gt tab_style cols_label cols_label_with md fmt_number cols_align cells_row_groups cell_text contains
 #' @export
 subgroupTable = function(data, fit, treatment, subgroups, digits=2){
   if(inherits(fit, "coxph")) {

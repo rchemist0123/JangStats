@@ -4,6 +4,7 @@
 #' @param x Vectors to check number of distinct values.
 #' @export
 #' @examples
+#' library(data.table)
 #' as.data.table(mtcars)[,ndist(cyl)]
 #' as.data.table(mtcars)[,ndist(.SD)]
 #' as.data.table(mtcars)[,lapply(.SD, ndist)]

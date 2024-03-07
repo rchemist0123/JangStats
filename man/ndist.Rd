@@ -13,6 +13,7 @@ ndist(x)
 Create a table of unique values of selected variables. Compatible with data.table.
 }
 \examples{
+library(data.table)
 as.data.table(mtcars)[,ndist(cyl)]
 as.data.table(mtcars)[,ndist(.SD)]
 as.data.table(mtcars)[,lapply(.SD, ndist)]
