@@ -4,13 +4,17 @@
 \alias{nprop}
 \title{Print frequency and proportion of a vector}
 \usage{
-nprop(x, digits = 2, na.rm = FALSE)
+nprop(x, digits = 1, na.rm = FALSE)
 }
 \arguments{
-\item{x}{A vector that check frequency and proportion}
+\item{x}{A vector to check frequency and proportion}
 
 \item{digits}{A digit for proportions}
 }
 \description{
 Create a table that checks the n, proportion of a vector. Compatible with data.table.
+}
+\examples{
+as.data.table(mtcars)[,nprop(cyl)]
+
 }

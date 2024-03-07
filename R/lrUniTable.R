@@ -16,7 +16,7 @@
 lrUniTable = function(data, outcome, vars, digits=2, p.digits=4) {
   result = lapply(vars,
          \(x){
-           form = springf("%s ~ %s", outcome, x) |> as.formula()
+           form = sprintf("%s ~ %s", outcome, x) |> as.formula()
            fit = glm(form, family=binomial(), data = data)
            coef = exp(coef(fit))[-1]
            confint = exp(confint.default(fit)[2,])
