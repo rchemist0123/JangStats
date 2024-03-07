@@ -24,7 +24,7 @@ subgroupTable = function(data, fit, treatment, subgroups, digits=2){
   for(s in subgroups){
     if(!classes[s] == 'factor') data[[s]] = as.factor(data[[s]])
   }
-  stopifnot("No subgroups are provided." = length(subgroups) >0)
+  stopifnot("No subgroups are provided." = length(subgroups) > 0)
   tbl = subgroupAnalysis(fit,
                          data = data,
                          treatment = treatment,
