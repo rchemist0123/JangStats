@@ -8,8 +8,9 @@
 #' @param binary.vars Variables having two categories. These variables will show N and proportions of the last category.
 #' @param row.groups A group for clinical category. Must be a list with group names of categories and row numbers.
 #' @param by.order The order of character variable using in `by`. Must be a vector.
-#' @param digits Digits of result values. Default as 1.
-#' @param p.digits Digits of p values. Default as 4.
+#' @param total Whether includes aggregation values of the all data. The default is TRUE.
+#' @param digits Digits of result values. The default is 1.
+#' @param p.digits Digits of p values. The default is 3.
 #' @return A baseline characteristics table.
 #' @importFrom data.table setDT copy setnames rbindlist set setcolorder transpose .N := data.table is.data.table
 #' @importFrom stats fisher.test t.test chisq.test anova lm median quantile sd wilcox.test
@@ -23,7 +24,7 @@
 #'  )
 #' @export
 baseTable = function(data, by = NULL, include = NULL, median.vars = NULL,
-                     binary.vars = NULL, row.groups = NULL, by.order = NULL,  digits = 1L, p.digits= 4L){
+                     binary.vars = NULL, row.groups = NULL, by.order = NULL, total=TRUE, digits = 1L, p.digits= 3L){
 
   stopifnot("digits must be integer class" = is.numeric(digits))
   stopifnot("p.digits must be integer class" = is.numeric(p.digits))
@@ -63,7 +64,7 @@ baseTable = function(data, by = NULL, include = NULL, median.vars = NULL,
         ) |> setnames(c("name"),x)
       }
       cat_tbl_total = cat_tbl |>
-        setnames(c(x,"n_prop"), c("variable", paste0("total",' (n=',format(nrow(data),big.mark=","),')')))
+        setnames(c(x,"n_prop"), c("Variable", paste0("total",' (n=',format(nrow(data),big.mark=","),')')))
 
       if(!is.null(by)){
         .by_level = length(unique(data[[by]]))
@@ -73,42 +74,51 @@ baseTable = function(data, by = NULL, include = NULL, median.vars = NULL,
                      formula = paste0(c(by,x), collapse = "~"),
                      value.var="n_prop",
                      fill = "0 (0.0)")
+        # TODO Add whitespace to subcategories
+        # setnames(cat_tbl,
+        #          old = names(cat_tbl)[-1],
+        #          new = sprintf("\u0020%s",names(cat_tbl)[-1]))
+        print(cat_tbl)
         if(x %in% binary.vars){
           setnames(cat_tbl, names(cat_tbl)[length(cat_tbl)], paste0(x,": ", names(cat_tbl)[length(cat_tbl)]))
           cat_tbl = cat_tbl[,c(1, length(cat_tbl)),with=F] |>
-            transpose(make.names = 1, keep.names = "variable")
+            transpose(make.names = 1, keep.names = "Variable")
         } else {
           cat_tbl = cat_tbl |>
             set(j = x, value="") |>
             setcolorder(x, after = 1) |>
-            transpose(make.names = 1, keep.names = "variable")
+            transpose(make.names = 1, keep.names = "Variable")
         }
         setnames(cat_tbl,
                  old = names(cat_tbl)[(ncol(cat_tbl)-.by_level+1):ncol(cat_tbl)],
-                 new = paste0(names(cat_tbl)[(ncol(cat_tbl)-.by_level+1):ncol(cat_tbl)],
+                 new = paste0(names(cat_tbl)[(ncol(cat_tbl) - .by_level+1):ncol(cat_tbl)],
                               paste0(" (n=", format(n_value, big.mark=","),")")))
-        .cat_mat = data[,table(mget(c(x,by)))]
         ## p-value
+        .cat_mat = data[,table(mget(c(x,by)))]
         if (length(.cat_mat[.cat_mat<5])>2) pval = data[,fisher.test(get(by), get(x) ,simulate.p.value=TRUE )][['p.value']]
         else pval = .cat_mat |> chisq.test() |> _[['p.value']]
         if(x %in% binary.vars) {
           pval_tbl = data.table(name = paste0(colname_row[[x]],": ",tab1_1[[x]]),
                                 "P-value" = ifelse(pval<0.001,'<0.001', format(round(pval, p.digits),nsmall=p.digits))) |>
-                                  setnames('name',"variable")
+                                  setnames('name',"Variable")
         } else {
           pval_tbl = data.table(x, "P-value" = ifelse(pval<0.001,'<0.001', format(round(pval, p.digits),nsmall=p.digits))) |>
-            setnames('x',"variable")
+            setnames('x',"Variable")
         }
 
-        cat_tbl = merge(cat_tbl, pval_tbl, by="variable", all.x = T, sort=F)
+        cat_tbl = merge(cat_tbl, pval_tbl, by="Variable", all.x = T, sort=F)
         cat_tbl[is.na(cat_tbl)] = ""
 
-        cat_tbl_final = merge(cat_tbl_total, cat_tbl, by="variable", sort=F)
+        if(!total){
+          cat_tbl_final = cat_tbl
+        } else {
+          cat_tbl_final = merge(cat_tbl_total, cat_tbl, by="Variable", sort=F)
+        }
       } else {
         cat_tbl_total
       }
     } else {
-      # Continuous variables
+      #############  Continuous Variables  ####################
       if(x %in% median.vars){
         cont_tbl_total = data[,lapply(.SD, \(x) paste0(
                             format(round(median(x, na.rm=T), digits), nsmall=digits), " [",
@@ -121,8 +131,8 @@ baseTable = function(data, by = NULL, include = NULL, median.vars = NULL,
       }
 
       cont_tbl_total = cont_tbl_total |>
-        set(j = "variable", value = x) |>
-        setcolorder("variable",before = 1) |>
+        set(j = "Variable", value = x) |>
+        setcolorder("Variable",before = 1) |>
         setnames(old = x, new = paste0("total",' (n=',format(nrow(data), big.mark=","),')'))
 
       if(!is.null(by)){
@@ -138,7 +148,7 @@ baseTable = function(data, by = NULL, include = NULL, median.vars = NULL,
             format(round(mean(x, na.rm=T), digits), nsmall=digits), " \u00b1 ",
             format(round(sd(x, na.rm=T), digits), nsmall=digits))), .SDcols=x, keyby = by]
         }
-        cont_tbl = cont_tbl |> transpose(make.names = 1, keep.names = "variable")
+        cont_tbl = cont_tbl |> transpose(make.names = 1, keep.names = "Variable")
         setnames(cont_tbl,
                  old = names(cont_tbl)[(ncol(cont_tbl)-.by_level+1):ncol(cont_tbl)],
                  new = paste0(names(cont_tbl)[(ncol(cont_tbl)-.by_level+1):ncol(cont_tbl)],
@@ -160,7 +170,11 @@ baseTable = function(data, by = NULL, include = NULL, median.vars = NULL,
           }
           }
         cont_tbl = cbind(cont_tbl, "P-value" = ifelse(pval<0.001,'<0.001', format(round(pval, p.digits), nsmall=p.digits)))
-        cont_tbl_final = merge(cont_tbl_total, cont_tbl, by="variable")
+        if(!total){
+          cont_tbl_final = cont_tbl
+        } else {
+          cont_tbl_final = merge(cont_tbl_total, cont_tbl, by="Variable")
+        }
       } else {
         cont_tbl_total
       }
@@ -197,7 +211,7 @@ baseTable = function(data, by = NULL, include = NULL, median.vars = NULL,
   if(is.null(by)){
     result = result |>
       cols_align(align =  "center",
-                 columns = !"variable") |>
+                 columns = !"Variable") |>
       cols_label("variable" = "Variable")
   }
   return(result)

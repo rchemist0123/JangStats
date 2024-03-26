@@ -12,8 +12,9 @@ baseTable(
   binary.vars = NULL,
   row.groups = NULL,
   by.order = NULL,
+  total = TRUE,
   digits = 1L,
-  p.digits = 4L
+  p.digits = 3L
 )
 }
 \arguments{
@@ -31,9 +32,11 @@ baseTable(
 
 \item{by.order}{The order of character variable using in `by`. Must be a vector.}
 
-\item{digits}{Digits of result values. Default as 1.}
+\item{total}{Whether includes aggregation values of the all data. The default is TRUE.}
 
-\item{p.digits}{Digits of p values. Default as 4.}
+\item{digits}{Digits of result values. The default is 1.}
+
+\item{p.digits}{Digits of p values. The default is 3.}
 }
 \value{
 A baseline characteristics table.
