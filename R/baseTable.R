@@ -6,7 +6,7 @@
 #' @param include Variables including in the table. If NULL, all variables in the data would be included.
 #' @param median.vars Variables aggregated to median and IQR.
 #' @param binary.vars Variables having two categories. These variables will show N and proportions of the last category.
-#' @param row.groups A group for clinical category. Must be a list with group names of categories and row numbers.
+#' @param row.groups Experimental. A group for clinical category. Must be a list with group names of categories and row numbers.
 #' @param by.order The order of character variable using in `by`. Must be a vector.
 #' @param total Whether includes aggregation values of the all data. The default is TRUE.
 #' @param digits Digits of result values. The default is 1.
@@ -17,15 +17,16 @@
 #' @importFrom gt gt cols_align cols_label tab_style cell_text cells_column_labels tab_row_group row_group_order
 #' @examples
 #' # example code
-#' baseTable(mtcars,
-#'  by="cyl",
+#' baseTable(
+#'  data = mtcars,
+#'  by = "cyl",
 #'  include = c("mpg", "am","hp","drat","wt","gear","qsec", "disp"),
 #'  binary.vars = c("vs","am"),
-#'
+#'  median.vars = c("drat","wt")
 #'  )
 #' @export
 baseTable = function(data, by = NULL, include = NULL, median.vars = NULL,
-                     binary.vars = NULL, row.groups = NULL, by.order = NULL, total=TRUE, digits = 1L, p.digits= 3L){
+                     binary.vars = NULL, by.order = NULL, total=TRUE, digits = 1L, p.digits= 3L, row.groups=NULL){
 
   stopifnot("digits must be integer class" = is.numeric(digits))
   stopifnot("p.digits must be integer class" = is.numeric(p.digits))
@@ -53,26 +54,26 @@ baseTable = function(data, by = NULL, include = NULL, median.vars = NULL,
 
     ###############  Categorical variables ##################
     if(class(data[[x]])[1] %in% c("character","factor","ordered") | .x_level < 5 ) {
-      tab1 = data[,.N, keyby = x] |> _[, "n_prop" := paste0(get("N")," (", round(get("N")/sum(get("N"))*100,1),")")][,c(x,"n_prop"),with=F]
+      tab1 = data[,.N, keyby = x] |> _[, "n_prop" := sprintf("%s (%s)", get("N"), round(get("N")/sum(get("N"))*100, digits))][,c(x,"n_prop"),with=F]
       colname_row = data.table(x,"") |> setnames(c('x','V2'),c(x,'n_prop'))
       cat_tbl = rbindlist(list(colname_row, tab1))
 
       if(x %in% binary.vars){
         tab1_1 = tab1[nrow(tab1),]
         cat_tbl = data.table(
-          name = paste0(colname_row[[x]],": ",tab1_1[[x]]),
+          name = sprintf("%s: %s", colname_row[[x]], tab1_1[[x]]) ,
           n_prop = tab1_1[["n_prop"]]
         ) |> setnames(c("name"),x)
       }
       cat_tbl_total = cat_tbl |>
-        setnames(c(x,"n_prop"), c("Variable", paste0("total",' (n=',format(nrow(data),big.mark=","),')')))
+        setnames(c(x,"n_prop"), c("Variable", sprintf("total (n=%s)",format(nrow(data),big.mark=","))))
 
       if(!is.null(by)){
         .by_level = length(unique(data[[by]]))
         data[[by]] = factor(data[[by]], levels = by.order)
-        tab1 = data[,.N, keyby=c(by, x)] |> _[,"n_prop" := paste0(get("N")," (", round(get("N")/sum(get("N"))*100,1),")"), by=by][,c(by,x,"n_prop"),with=F]
+        tab1 = data[,.N, keyby=c(by, x)] |> _[,"n_prop" := sprintf("%s (%s)", get("N"), round(get("N")/sum(get("N"))*100, digits)), by=by][,c(by, x,"n_prop"), with=F]
         cat_tbl = dcast(tab1,
-                     formula = paste0(c(by,x), collapse = "~"),
+                     formula = sprintf("%s ~ %s", by, x),
                      value.var="n_prop",
                      fill = "0 (0.0)")
         # Add whitespace to subcategories
@@ -82,7 +83,7 @@ baseTable = function(data, by = NULL, include = NULL, median.vars = NULL,
         if(x %in% binary.vars){
           setnames(cat_tbl,
                    names(cat_tbl)[length(cat_tbl)],
-                   paste0(x,": ", trimws(names(cat_tbl))[length(cat_tbl)]))
+                   sprintf("%s: %s",x, trimws(names(cat_tbl))[length(cat_tbl)]))
           cat_tbl = cat_tbl[,c(1, length(cat_tbl)),with=F] |>
             transpose(make.names = 1, keep.names = "Variable")
         } else {
@@ -122,33 +123,23 @@ baseTable = function(data, by = NULL, include = NULL, median.vars = NULL,
     } else {
       #############  Continuous Variables  ####################
       if(x %in% median.vars){
-        cont_tbl_total = data[,lapply(.SD, \(x) paste0(
-                            format(round(median(x, na.rm=T), digits), nsmall=digits), " [",
-                            format(round(quantile(x, probs=.25, na.rm=T), digits), nsmall=digits), '-',
-                            format(round(quantile(x, probs=.75, na.rm=T), digits), nsmall=digits), ']')), .SDcols=x]
+        cont_tbl_total = data[,lapply(.SD, \(x) .cont_med_iqr(x, digits)), .SDcols=x]
       } else {
-        cont_tbl_total = data[,lapply(.SD, \(x) paste0(
-          format(round(mean(x, na.rm=T), digits), nsmall=digits), " \u00b1 ",
-          format(round(sd(x, na.rm=T), digits), nsmall=digits))), .SDcols=x]
+        cont_tbl_total = data[,lapply(.SD, \(x) .cont_mean_sd(x, digits)), .SDcols=x]
       }
 
       cont_tbl_total = cont_tbl_total |>
         set(j = "Variable", value = x) |>
         setcolorder("Variable",before = 1) |>
-        setnames(old = x, new = paste0("total",' (n=',format(nrow(data), big.mark=","),')'))
+        setnames(x, sprintf("total (n=%s)", format(nrow(data), big.mark=",")))
 
       if(!is.null(by)){
         .by_level = length(unique(data[[by]]))
         data[[by]] = factor(data[[by]], levels = by.order)
         if(x %in% median.vars){
-          cont_tbl = data[,lapply(.SD, \(x) paste0(
-            format(round(median(x, na.rm=T), digits), nsmall=digits), " [",
-            format(round(quantile(x, probs=.25, na.rm=T), digits), nsmall=digits),'-',
-            format(round(quantile(x, probs=.75, na.rm=T), digits), nsmall=digits ),']')), .SDcols=x, keyby = by]
+          cont_tbl = data[,lapply(.SD, \(x) .cont_med_iqr(x, digits)), .SDcols=x, keyby = by]
         } else {
-          cont_tbl = data[,lapply(.SD, \(x) paste0(
-            format(round(mean(x, na.rm=T), digits), nsmall=digits), " \u00b1 ",
-            format(round(sd(x, na.rm=T), digits), nsmall=digits))), .SDcols=x, keyby = by]
+          cont_tbl = data[,lapply(.SD, \(x) .cont_mean_sd(x, digits)), .SDcols=x, keyby = by]
         }
         cont_tbl = cont_tbl |> transpose(make.names = 1, keep.names = "Variable")
         setnames(cont_tbl,
@@ -192,23 +183,23 @@ baseTable = function(data, by = NULL, include = NULL, median.vars = NULL,
   })
   result = tbls |>
     rbindlist(use.names = T)
-  if(!is.null(row.groups)){
-    tbls_split = lapply(names(row.groups), \(x) {
-      if(nrow(result) < row.groups[[x]][1]) {} # only if by in includes
-      else {
-        temp = result[row.groups[[x]],]; col_len = length(names(temp))
-        colnum = ncol(temp)
-        blank_row = matrix(rep("", col_len), ncol=col_len) |> as.data.table()
-        setnames(blank_row, names(blank_row), names(temp))
-        temp2 = rbind(blank_row, temp)
-        temp2[['category']] = c(x, rep("", length(row.groups[[x]])))
-        setcolorder(temp2, "category", before=1)
-      }
-    })
-    result = rbindlist(tbls_split)
-  } else {
-    result
-  }
+  # if(!is.null(row.groups)){
+  #   tbls_split = lapply(names(row.groups), \(x) {
+  #     if(nrow(result) < row.groups[[x]][1]) {} # only if by in includes
+  #     else {
+  #       temp = result[row.groups[[x]],]; col_len = length(names(temp))
+  #       colnum = ncol(temp)
+  #       blank_row = matrix(rep("", col_len), ncol=col_len) |> as.data.table()
+  #       setnames(blank_row, names(blank_row), names(temp))
+  #       temp2 = rbind(blank_row, temp)
+  #       temp2[['category']] = c(x, rep("", length(row.groups[[x]])))
+  #       setcolorder(temp2, "category", before=1)
+  #     }
+  #   })
+  #   result = rbindlist(tbls_split)
+  # } else {
+  #   result
+  # }
   result = result |>
     gt(rowname_col = T) |>
     tab_style(
@@ -228,7 +219,6 @@ baseTable = function(data, by = NULL, include = NULL, median.vars = NULL,
     result = result |>
       cols_align(align =  "center",
                  columns = !"Variable")
-
   }
   return(result)
 }

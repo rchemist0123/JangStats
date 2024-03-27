@@ -10,11 +10,11 @@ baseTable(
   include = NULL,
   median.vars = NULL,
   binary.vars = NULL,
-  row.groups = NULL,
   by.order = NULL,
   total = TRUE,
   digits = 1L,
-  p.digits = 3L
+  p.digits = 3L,
+  row.groups = NULL
 )
 }
 \arguments{
@@ -28,8 +28,6 @@ baseTable(
 
 \item{binary.vars}{Variables having two categories. These variables will show N and proportions of the last category.}
 
-\item{row.groups}{A group for clinical category. Must be a list with group names of categories and row numbers.}
-
 \item{by.order}{The order of character variable using in `by`. Must be a vector.}
 
 \item{total}{Whether includes aggregation values of the all data. The default is TRUE.}
@@ -37,6 +35,8 @@ baseTable(
 \item{digits}{Digits of result values. The default is 1.}
 
 \item{p.digits}{Digits of p values. The default is 3.}
+
+\item{row.groups}{Experimental. A group for clinical category. Must be a list with group names of categories and row numbers.}
 }
 \value{
 A baseline characteristics table.
@@ -46,9 +46,11 @@ Create a baseline characteristic table by group variable
 }
 \examples{
 # example code
-baseTable(mtcars,
- by="cyl",
+baseTable(
+ data = mtcars,
+ by = "cyl",
  include = c("mpg", "am","hp","drat","wt","gear","qsec", "disp"),
- binary.vars = c("vs","am")
+ binary.vars = c("vs","am"),
+ median.vars = c("drat","wt")
  )
 }
