@@ -5,12 +5,13 @@
 #' @param fit A logistic regression or Cox regression model
 #' @param treatment A variable that could divide case & control group.
 #' @param subgroups Categorical Variable(s) for the subgroup analysis.
-#' @param digits Digits of result values. Default as 2.
+#' @param digits Digits of result values. The default is 2.
+#' @param p.digits Digits of p-interaction. The default is 4.
 #' @return A table of Subgroup analysis with subgroups, level, case, control,  estimates, ci, and p interaction
 #' @importFrom Publish subgroupAnalysis
 #' @importFrom gt gt tab_style cols_label cols_label_with md fmt_number cols_align cells_row_groups cell_text contains
 #' @export
-subgroupTable = function(data, fit, treatment, subgroups, digits=2){
+subgroupTable = function(data, fit, treatment, subgroups, digits=2, p.digits=4){
   if(inherits(fit, "coxph")) {
     est = "HR (95% CI)"
     tbl_col = "HazardRatio"
@@ -29,12 +30,12 @@ subgroupTable = function(data, fit, treatment, subgroups, digits=2){
                          data = data,
                          treatment = treatment,
                          subgroups = subgroups)
-  tbl[[est]] = paste0(format(round(tbl[[tbl_col]],digits), nsmall=digits),
-                      ' (', format(round(tbl[['Lower']],digits), nsmall=digits), '-',
-                      format(round(tbl[['Upper']],digits), nsmall=digits),
-                      ')')
-  tbl[['control']] = paste0(tbl[['event_0']],'/', tbl[['sample_0']])
-  tbl[['case']] = paste0(tbl[['event_1']],'/',tbl[['sample_1']])
+  tbl[[est]] = sprintf("%s (%s\u2014%s)", format(round(tbl[[tbl_col]],digits), nsmall=digits),
+                       format(round(tbl[['Lower']],digits), nsmall=digits),
+                       format(round(tbl[['Upper']],digits), nsmall=digits)
+                       )
+  tbl[['control']] = sprintf("%s/%s", tbl[['event_0']], tbl[['sample_0']])
+  tbl[['case']] = sprintf("%s/%s", tbl[['event_1']], tbl[['sample_1']])
   tbl[,c('subgroups', 'level', 'case', 'control', eval(est), 'pinteraction')] |>
     gt(groupname_col = "subgroups") |>
     cols_label(
@@ -52,7 +53,7 @@ subgroupTable = function(data, fit, treatment, subgroups, digits=2){
     ) |>
     fmt_number(
       columns = "pinteraction",
-      decimals = 4
+      decimals = p.digits
     ) |>
     tab_style(
       style = list(cell_text(weight="bold")),
