@@ -20,7 +20,8 @@
 #' baseTable(mtcars,
 #'  by="cyl",
 #'  include = c("mpg", "am","hp","drat","wt","gear","qsec", "disp"),
-#'  binary.vars = c("vs","am")
+#'  binary.vars = c("vs","am"),
+#'
 #'  )
 #' @export
 baseTable = function(data, by = NULL, include = NULL, median.vars = NULL,
@@ -50,7 +51,7 @@ baseTable = function(data, by = NULL, include = NULL, median.vars = NULL,
   tbls = lapply(include, \(x){
     .x_level = length(unique(data[[x]]))
 
-    # Categorical variables
+    ###############  Categorical variables ##################
     if(class(data[[x]])[1] %in% c("character","factor","ordered") | .x_level < 5 ) {
       tab1 = data[,.N, keyby = x] |> _[, "n_prop" := paste0(get("N")," (", round(get("N")/sum(get("N"))*100,1),")")][,c(x,"n_prop"),with=F]
       colname_row = data.table(x,"") |> setnames(c('x','V2'),c(x,'n_prop'))
@@ -74,13 +75,14 @@ baseTable = function(data, by = NULL, include = NULL, median.vars = NULL,
                      formula = paste0(c(by,x), collapse = "~"),
                      value.var="n_prop",
                      fill = "0 (0.0)")
-        # TODO Add whitespace to subcategories
-        # setnames(cat_tbl,
-        #          old = names(cat_tbl)[-1],
-        #          new = sprintf("\u0020%s",names(cat_tbl)[-1]))
-        print(cat_tbl)
+        # Add whitespace to subcategories
+        setnames(cat_tbl,
+                 names(cat_tbl)[-1],
+                 sprintf("    %s",names(cat_tbl)[-1]))
         if(x %in% binary.vars){
-          setnames(cat_tbl, names(cat_tbl)[length(cat_tbl)], paste0(x,": ", names(cat_tbl)[length(cat_tbl)]))
+          setnames(cat_tbl,
+                   names(cat_tbl)[length(cat_tbl)],
+                   paste0(x,": ", trimws(names(cat_tbl))[length(cat_tbl)]))
           cat_tbl = cat_tbl[,c(1, length(cat_tbl)),with=F] |>
             transpose(make.names = 1, keep.names = "Variable")
         } else {
@@ -90,12 +92,12 @@ baseTable = function(data, by = NULL, include = NULL, median.vars = NULL,
             transpose(make.names = 1, keep.names = "Variable")
         }
         setnames(cat_tbl,
-                 old = names(cat_tbl)[(ncol(cat_tbl)-.by_level+1):ncol(cat_tbl)],
-                 new = paste0(names(cat_tbl)[(ncol(cat_tbl) - .by_level+1):ncol(cat_tbl)],
+                 names(cat_tbl)[(ncol(cat_tbl)-.by_level+1):ncol(cat_tbl)],
+                 paste0(names(cat_tbl)[(ncol(cat_tbl) - .by_level+1):ncol(cat_tbl)],
                               paste0(" (n=", format(n_value, big.mark=","),")")))
         ## p-value
         .cat_mat = data[,table(mget(c(x,by)))]
-        if (length(.cat_mat[.cat_mat<5])>2) pval = data[,fisher.test(get(by), get(x) ,simulate.p.value=TRUE )][['p.value']]
+        if (length(.cat_mat[.cat_mat <5])>2) pval = data[,fisher.test(get(by), get(x) ,simulate.p.value=TRUE )][['p.value']]
         else pval = .cat_mat |> chisq.test() |> _[['p.value']]
         if(x %in% binary.vars) {
           pval_tbl = data.table(name = paste0(colname_row[[x]],": ",tab1_1[[x]]),
@@ -150,13 +152,21 @@ baseTable = function(data, by = NULL, include = NULL, median.vars = NULL,
         }
         cont_tbl = cont_tbl |> transpose(make.names = 1, keep.names = "Variable")
         setnames(cont_tbl,
-                 old = names(cont_tbl)[(ncol(cont_tbl)-.by_level+1):ncol(cont_tbl)],
-                 new = paste0(names(cont_tbl)[(ncol(cont_tbl)-.by_level+1):ncol(cont_tbl)],
+                 names(cont_tbl)[(ncol(cont_tbl)-.by_level+1):ncol(cont_tbl)],
+                 paste0(names(cont_tbl)[(ncol(cont_tbl)-.by_level+1):ncol(cont_tbl)],
                               paste0(" (n=", format(n_value, big.mark=","),")")))
 
-        .pval_form = paste0(x,"~",by) |> as.formula()
-        if(.by_level >= 3) pval = anova(lm(.pval_form, data))[["Pr(>F)"]] |> _[1]
-        else {
+        .pval_form = sprintf("%s ~ %s", x, by) |> as.formula()
+
+        if(.by_level >= 3) {
+        # ANOVA
+          if(x %in% median.vars) {
+            pval = kruskal.test(.pval_form, data)[['p.value']]
+          } else {
+            pval = anova(lm(.pval_form, data))[["Pr(>F)"]] |> _[1]
+          }
+        } else {
+        # T-test
           if(x %in% median.vars){
             pval = wilcox.test(.pval_form, exact=F, data)[['p.value']]
           } else {
@@ -168,7 +178,7 @@ baseTable = function(data, by = NULL, include = NULL, median.vars = NULL,
               finally = assign("pval", wilcox.test(.pval_form, exact=F, data=data)[['p.value']])
             )
           }
-          }
+        }
         cont_tbl = cbind(cont_tbl, "P-value" = ifelse(pval<0.001,'<0.001', format(round(pval, p.digits), nsmall=p.digits)))
         if(!total){
           cont_tbl_final = cont_tbl
@@ -201,6 +211,12 @@ baseTable = function(data, by = NULL, include = NULL, median.vars = NULL,
   }
   result = result |>
     gt(rowname_col = T) |>
+    tab_style(
+      style = cell_text(whitespace = "pre"),
+      locations = cells_body(
+        columns = "Variable"
+      )
+    ) |>
     cols_align(align = "center",
                columns = names(result)[2:ncol(result)]) |>
     tab_style(
@@ -211,8 +227,8 @@ baseTable = function(data, by = NULL, include = NULL, median.vars = NULL,
   if(is.null(by)){
     result = result |>
       cols_align(align =  "center",
-                 columns = !"Variable") |>
-      cols_label("variable" = "Variable")
+                 columns = !"Variable")
+
   }
   return(result)
 }
