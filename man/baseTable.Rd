@@ -30,7 +30,7 @@ baseTable(
 
 \item{by.order}{The order of character variable using in `by`. Must be a vector.}
 
-\item{total}{Whether includes aggregation values of the all data. The default is TRUE.}
+\item{total}{Logical. Whether includes aggregation values of the all data. The default is TRUE.}
 
 \item{digits}{Digits of result values. The default is 1.}
 

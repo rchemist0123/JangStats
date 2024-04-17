@@ -8,12 +8,12 @@
 #' @param binary.vars Variables having two categories. These variables will show N and proportions of the last category.
 #' @param row.groups Experimental. A group for clinical category. Must be a list with group names of categories and row numbers.
 #' @param by.order The order of character variable using in `by`. Must be a vector.
-#' @param total Whether includes aggregation values of the all data. The default is TRUE.
+#' @param total Logical. Whether includes aggregation values of the all data. The default is TRUE.
 #' @param digits Digits of result values. The default is 1.
 #' @param p.digits Digits of p values. The default is 3.
 #' @return A baseline characteristics table.
 #' @importFrom data.table setDT copy setnames rbindlist set setcolorder transpose .N := data.table is.data.table
-#' @importFrom stats fisher.test t.test chisq.test anova lm median quantile sd wilcox.test
+#' @importFrom stats kruskal.test fisher.test t.test chisq.test anova lm median quantile sd wilcox.test
 #' @importFrom gt gt cols_align cols_label tab_style cell_text cells_column_labels tab_row_group row_group_order
 #' @examples
 #' # example code
@@ -67,7 +67,7 @@ baseTable = function(data, by = NULL, include = NULL, median.vars = NULL,
       }
       cat_tbl_total = cat_tbl |>
         setnames(c(x,"n_prop"), c("Variable", sprintf("total (n=%s)",format(nrow(data),big.mark=","))))
-
+      cat_tbl_total[-1, x:= sprintf("    %s",x), env = list(x="Variable")]
       if(!is.null(by)){
         .by_level = length(unique(data[[by]]))
         data[[by]] = factor(data[[by]], levels = by.order)
@@ -96,6 +96,7 @@ baseTable = function(data, by = NULL, include = NULL, median.vars = NULL,
                  names(cat_tbl)[(ncol(cat_tbl)-.by_level+1):ncol(cat_tbl)],
                  paste0(names(cat_tbl)[(ncol(cat_tbl) - .by_level+1):ncol(cat_tbl)],
                               paste0(" (n=", format(n_value, big.mark=","),")")))
+
         ## p-value
         .cat_mat = data[,table(mget(c(x,by)))]
         if (length(.cat_mat[.cat_mat <5])>2) pval = data[,fisher.test(get(by), get(x) ,simulate.p.value=TRUE )][['p.value']]
@@ -111,7 +112,7 @@ baseTable = function(data, by = NULL, include = NULL, median.vars = NULL,
 
         cat_tbl = merge(cat_tbl, pval_tbl, by="Variable", all.x = T, sort=F)
         cat_tbl[is.na(cat_tbl)] = ""
-
+        print(cat_tbl)
         if(!total){
           cat_tbl_final = cat_tbl
         } else {
@@ -203,7 +204,7 @@ baseTable = function(data, by = NULL, include = NULL, median.vars = NULL,
   result = result |>
     gt(rowname_col = T) |>
     tab_style(
-      style = cell_text(whitespace = "pre"),
+      style = cell_text(whitespace="pre"),
       locations = cells_body(
         columns = "Variable"
       )
