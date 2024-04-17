@@ -112,7 +112,6 @@ baseTable = function(data, by = NULL, include = NULL, median.vars = NULL,
 
         cat_tbl = merge(cat_tbl, pval_tbl, by="Variable", all.x = T, sort=F)
         cat_tbl[is.na(cat_tbl)] = ""
-        print(cat_tbl)
         if(!total){
           cat_tbl_final = cat_tbl
         } else {
