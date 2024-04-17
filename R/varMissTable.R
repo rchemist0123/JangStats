@@ -3,13 +3,14 @@
 #' Create a table that checks the n, proportion of missing values of variables
 #' @param data A data for the table
 #' @param include Variables to check the number of missing values. if NA, all variables in data are included.
+#' @param order Logical. Whether arrange tables by the number of missing values. The default is FALSE
 #' @importFrom data.table as.data.table .SD melt dcast setorderv
 #' @importFrom gt gt tab_header
 #' @examples
 #' # example code
 #' varMissTable(airquality)
 #' @export
-varMissTable = function(data, include=NULL) {
+varMissTable = function(data, include=NULL, order = FALSE) {
   stopifnot("The data must be one of data.frame, tbl_df, or data.table." =
               (class(data)[1] %in% c("data.frame","tbl_df","data.table")))
   if(length(include) > 0){
@@ -23,7 +24,9 @@ varMissTable = function(data, include=NULL) {
   df[['name']] = c('N','rate(%)')
   x_melt = melt(df, id.vars='name')
   x_dcast = dcast(x_melt, variable ~ name, value.var = 'value')
-  setorderv(x_dcast, "N", -1)
+  if(order){
+    setorderv(x_dcast, "N", -1)
+  }
   tbl = x_dcast  |>
     gt()  |>
     tab_header(title='Missing values of variables')
