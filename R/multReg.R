@@ -10,6 +10,7 @@
 #' @importFrom survival coxph
 #' @export
 multReg = function(data, outcome, vars, time=NULL){
+  # TODO: glmer() in lme4
   if(is.null(time)){
     form = sprintf("%s ~ %s", outcome, paste0(vars, collapse=" + "))
     fit = glm(as.formula(form), family=binomial(), data = data)

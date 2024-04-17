@@ -4,7 +4,7 @@
 \alias{subgroupTable}
 \title{Subgroup analysis table}
 \usage{
-subgroupTable(data, fit, treatment, subgroups, digits = 2)
+subgroupTable(data, fit, treatment, subgroups, digits = 2, p.digits = 4)
 }
 \arguments{
 \item{data}{A data for analysis}
@@ -15,7 +15,9 @@ subgroupTable(data, fit, treatment, subgroups, digits = 2)
 
 \item{subgroups}{Categorical Variable(s) for the subgroup analysis.}
 
-\item{digits}{Digits of result values. Default as 2.}
+\item{digits}{Digits of result values. The default is 2.}
+
+\item{p.digits}{Digits of p-interaction. The default is 4.}
 }
 \value{
 A table of Subgroup analysis with subgroups, level, case, control,  estimates, ci, and p interaction

@@ -7,15 +7,17 @@
 #' @export
 #' @examples
 #' library(data.table)
-#' as.data.table(mtcars)[,nprop(cyl)]
+#' as.data.table(mtcars)[,nProp(cyl)]
 #'
-nprop = function(x, digits = 1, missing=FALSE){
+nProp = function(x, digits = 1, missing=FALSE){
   if(!missing) n = table(x)
   else n = table(x, useNA = "ifany")
   p = round(proportions(n)*100, digits) |> as.vector();
-  nm = deparse(substitute(x))
+  name = deparse(substitute(x))
   l = list()
-  l[[nm]] = names(n);
-  l[["N(%)"]] = sprintf("%s (%s)", as.vector(n), p)
+  l[[name]] = names(n);
+  l[['N']] = as.vector(n);
+  l[['P']] = p
+  # print(l)
   return(l)
 }
