@@ -14,7 +14,7 @@
 #' @return A baseline characteristics table.
 #' @importFrom data.table setDT copy setnames rbindlist set setcolorder transpose .N := data.table is.data.table
 #' @importFrom stats kruskal.test fisher.test t.test chisq.test anova lm median quantile sd wilcox.test
-#' @importFrom gt gt cols_align cols_label tab_style cell_text cells_column_labels tab_row_group row_group_order
+#' @importFrom gt gt cols_align cols_label tab_style cell_text cells_column_labels tab_row_group row_group_order fmt_markdown
 #' @examples
 #' # example code
 #' baseTable(
@@ -67,7 +67,7 @@ baseTable = function(data, by = NULL, include = NULL, median.vars = NULL,
       }
       cat_tbl_total = cat_tbl |>
         setnames(c(x,"n_prop"), c("Variable", sprintf("total (n=%s)",format(nrow(data),big.mark=","))))
-      cat_tbl_total[-1, x:= sprintf("    %s",x), env = list(x="Variable")]
+      cat_tbl_total[-1, x:= sprintf("\U00A0\U00A0\U00A0\U00A0%s",x), env = list(x="Variable")]
       if(!is.null(by)){
         .by_level = length(unique(data[[by]]))
         data[[by]] = factor(data[[by]], levels = by.order)
@@ -76,10 +76,10 @@ baseTable = function(data, by = NULL, include = NULL, median.vars = NULL,
                      formula = sprintf("%s ~ %s", by, x),
                      value.var="n_prop",
                      fill = "0 (0.0)")
-        # Add whitespace to subcategories
+
         setnames(cat_tbl,
                  names(cat_tbl)[-1],
-                 sprintf("    %s",names(cat_tbl)[-1]))
+                 sprintf("\U00A0\U00A0\U00A0\U00A0%s",names(cat_tbl)[-1]))
         if(x %in% binary.vars){
           setnames(cat_tbl,
                    names(cat_tbl)[length(cat_tbl)],
@@ -183,6 +183,7 @@ baseTable = function(data, by = NULL, include = NULL, median.vars = NULL,
   })
   result = tbls |>
     rbindlist(use.names = T)
+  # TODO Split rows by `row.groups`
   # if(!is.null(row.groups)){
   #   tbls_split = lapply(names(row.groups), \(x) {
   #     if(nrow(result) < row.groups[[x]][1]) {} # only if by in includes
@@ -202,12 +203,8 @@ baseTable = function(data, by = NULL, include = NULL, median.vars = NULL,
   # }
   result = result |>
     gt(rowname_col = T) |>
-    tab_style(
-      style = cell_text(whitespace="pre"),
-      locations = cells_body(
-        columns = "Variable"
-      )
-    ) |>
+    fmt_markdown(
+      columns = "Variable") |>
     cols_align(align = "center",
                columns = names(result)[2:ncol(result)]) |>
     tab_style(
