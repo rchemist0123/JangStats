@@ -9,7 +9,7 @@
 #' @param row.groups Experimental. A group for clinical category. Must be a list with group names of categories and row numbers.
 #' @param by.order The order of character variable using in `by`. Must be a vector.
 #' @param total Logical. Whether includes aggregation values of the all data. The default is TRUE.
-#' @param missing Logical. Whether includes missing variable in categorical varibles. The default is TRUE.
+#' @param missing Logical. Whether includes missing variable in categorical varibles. The default is FALSE.
 #' @param digits Digits of result values. The default is 1.
 #' @param p.digits Digits of p values. The default is 3.
 #' @return A baseline characteristics table.
@@ -28,7 +28,7 @@
 #' @export
 baseTable = function(data, by = NULL, include = NULL, median.vars = NULL,
                      binary.vars = NULL, by.order = NULL, total=TRUE,
-                     missing = TRUE,
+                     missing = FALSE,
                      digits = 1L, p.digits= 3L, row.groups=NULL){
 
   stopifnot("digits must be integer class" = is.numeric(digits))
@@ -46,22 +46,22 @@ baseTable = function(data, by = NULL, include = NULL, median.vars = NULL,
     if(!by %in% names(data)) stop(gettextf("%s not found in data.", sQuote(by)))
     if(any(is.na(data[[by]]))) {
       warning(gettextf("Missing values exist on group variable %s, NA are excluded.",sQuote(by)))
-      data = data[!is.na(by)]
+      data = data[!is.na(get(by)) & get(by) != 'NA']
     }
   } else {
     n_value = nrow(data)
   }
   # TODO: missing variables
   tbls = lapply(include, \(x){
-    if(!missing) data = data[!is.na(x)]
-    else data = data
+    if(!missing){
+      data = data[!is.na(get(x)) & get(x) != 'NA']
+    }
     .x_level = length(unique(data[[x]]))
     ############### Categorical variables ##################
     if(class(data[[x]])[1] %in% c("character","factor","ordered") | .x_level < 5 ) {
       tab1 = data[,.N, keyby = x] |> _[, "n_prop" := sprintf("%s (%s)", get("N"), round(get("N")/sum(get("N"))*100, digits))][,c(x,"n_prop"),with=F]
       colname_row = data.table(x,"") |> setnames(c('x','V2'),c(x,'n_prop'))
       cat_tbl = rbindlist(list(colname_row, tab1))
-
       if(x %in% binary.vars){
         tab1_1 = tab1[nrow(tab1),]
         cat_tbl = data.table(
@@ -73,7 +73,7 @@ baseTable = function(data, by = NULL, include = NULL, median.vars = NULL,
         setnames(c(x,"n_prop"), c("Variable", sprintf("total (n=%s)",format(nrow(data),big.mark=","))))
       cat_tbl_total[-1, x:= sprintf("\U00A0\U00A0\U00A0\U00A0%s",x), env = list(x="Variable")]
       if(!is.null(by)){
-        .by_level = length(unique(data[[by]]))
+        .by_level = length(unique(data[[by]]));
         data[[by]] = factor(data[[by]], levels = by.order)
         tab1 = data[,.N, keyby=c(by, x)] |> _[,"n_prop" := sprintf("%s (%s)", get("N"), round(get("N")/sum(get("N"))*100, digits)), by=by][,c(by, x,"n_prop"), with=F]
         cat_tbl = dcast(tab1,
@@ -99,7 +99,7 @@ baseTable = function(data, by = NULL, include = NULL, median.vars = NULL,
         setnames(cat_tbl,
                  names(cat_tbl)[(ncol(cat_tbl)-.by_level+1):ncol(cat_tbl)],
                  paste0(names(cat_tbl)[(ncol(cat_tbl) - .by_level+1):ncol(cat_tbl)],
-                              paste0(" (n=", format(n_value, big.mark=","),")")))
+                        paste0(" (n=", format(n_value, big.mark=","),")")))
 
         ## p-value
         .cat_mat = data[,table(mget(c(x,by)))]
@@ -108,7 +108,7 @@ baseTable = function(data, by = NULL, include = NULL, median.vars = NULL,
         if(x %in% binary.vars) {
           pval_tbl = data.table(name = paste0(colname_row[[x]],": ",tab1_1[[x]]),
                                 "P-value" = ifelse(pval<0.001,'<0.001', format(round(pval, p.digits),nsmall=p.digits))) |>
-                                  setnames('name',"Variable")
+            setnames('name',"Variable")
         } else {
           pval_tbl = data.table(x, "P-value" = ifelse(pval<0.001,'<0.001', format(round(pval, p.digits),nsmall=p.digits))) |>
             setnames('x',"Variable")
@@ -149,19 +149,19 @@ baseTable = function(data, by = NULL, include = NULL, median.vars = NULL,
         setnames(cont_tbl,
                  names(cont_tbl)[(ncol(cont_tbl)-.by_level+1):ncol(cont_tbl)],
                  paste0(names(cont_tbl)[(ncol(cont_tbl)-.by_level+1):ncol(cont_tbl)],
-                              paste0(" (n=", format(n_value, big.mark=","),")")))
+                        paste0(" (n=", format(n_value, big.mark=","),")")))
 
         .pval_form = sprintf("%s ~ %s", x, by) |> as.formula()
 
         if(.by_level >= 3) {
-        # ANOVA
+          # ANOVA
           if(x %in% median.vars) {
             pval = kruskal.test(.pval_form, data)[['p.value']]
           } else {
             pval = anova(lm(.pval_form, data))[["Pr(>F)"]] |> _[1]
           }
         } else {
-        # T-test
+          # T-test
           if(x %in% median.vars){
             pval = wilcox.test(.pval_form, exact=F, data)[['p.value']]
           } else {
@@ -186,7 +186,7 @@ baseTable = function(data, by = NULL, include = NULL, median.vars = NULL,
     }
   })
   result = tbls |>
-    rbindlist(use.names = T)
+    rbindlist(use.names = F)
   # TODO Split rows by `row.groups`
   # if(!is.null(row.groups)){
   #   tbls_split = lapply(names(row.groups), \(x) {

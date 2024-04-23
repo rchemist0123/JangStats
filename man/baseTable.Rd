@@ -12,7 +12,7 @@ baseTable(
   binary.vars = NULL,
   by.order = NULL,
   total = TRUE,
-  missing = TRUE,
+  missing = FALSE,
   digits = 1L,
   p.digits = 3L,
   row.groups = NULL
@@ -33,7 +33,7 @@ baseTable(
 
 \item{total}{Logical. Whether includes aggregation values of the all data. The default is TRUE.}
 
-\item{missing}{Logical. Whether includes missing variable in categorical varibles. The default is TRUE.}
+\item{missing}{Logical. Whether includes missing variable in categorical varibles. The default is FALSE.}
 
 \item{digits}{Digits of result values. The default is 1.}
 
