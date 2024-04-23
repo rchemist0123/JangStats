@@ -12,6 +12,7 @@ baseTable(
   binary.vars = NULL,
   by.order = NULL,
   total = TRUE,
+  missing = TRUE,
   digits = 1L,
   p.digits = 3L,
   row.groups = NULL
@@ -31,6 +32,8 @@ baseTable(
 \item{by.order}{The order of character variable using in `by`. Must be a vector.}
 
 \item{total}{Logical. Whether includes aggregation values of the all data. The default is TRUE.}
+
+\item{missing}{Logical. Whether includes missing variable in categorical varibles. The default is TRUE.}
 
 \item{digits}{Digits of result values. The default is 1.}
 

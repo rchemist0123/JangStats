@@ -9,6 +9,7 @@
 #' @param row.groups Experimental. A group for clinical category. Must be a list with group names of categories and row numbers.
 #' @param by.order The order of character variable using in `by`. Must be a vector.
 #' @param total Logical. Whether includes aggregation values of the all data. The default is TRUE.
+#' @param missing Logical. Whether includes missing variable in categorical varibles. The default is TRUE.
 #' @param digits Digits of result values. The default is 1.
 #' @param p.digits Digits of p values. The default is 3.
 #' @return A baseline characteristics table.
@@ -26,7 +27,9 @@
 #'  )
 #' @export
 baseTable = function(data, by = NULL, include = NULL, median.vars = NULL,
-                     binary.vars = NULL, by.order = NULL, total=TRUE, digits = 1L, p.digits= 3L, row.groups=NULL){
+                     binary.vars = NULL, by.order = NULL, total=TRUE,
+                     missing = TRUE,
+                     digits = 1L, p.digits= 3L, row.groups=NULL){
 
   stopifnot("digits must be integer class" = is.numeric(digits))
   stopifnot("p.digits must be integer class" = is.numeric(p.digits))
@@ -48,11 +51,12 @@ baseTable = function(data, by = NULL, include = NULL, median.vars = NULL,
   } else {
     n_value = nrow(data)
   }
-
+  # TODO: missing variables
   tbls = lapply(include, \(x){
+    if(!missing) data = data[!is.na(x)]
+    else data = data
     .x_level = length(unique(data[[x]]))
-
-    ###############  Categorical variables ##################
+    ############### Categorical variables ##################
     if(class(data[[x]])[1] %in% c("character","factor","ordered") | .x_level < 5 ) {
       tab1 = data[,.N, keyby = x] |> _[, "n_prop" := sprintf("%s (%s)", get("N"), round(get("N")/sum(get("N"))*100, digits))][,c(x,"n_prop"),with=F]
       colname_row = data.table(x,"") |> setnames(c('x','V2'),c(x,'n_prop'))
@@ -73,9 +77,9 @@ baseTable = function(data, by = NULL, include = NULL, median.vars = NULL,
         data[[by]] = factor(data[[by]], levels = by.order)
         tab1 = data[,.N, keyby=c(by, x)] |> _[,"n_prop" := sprintf("%s (%s)", get("N"), round(get("N")/sum(get("N"))*100, digits)), by=by][,c(by, x,"n_prop"), with=F]
         cat_tbl = dcast(tab1,
-                     formula = sprintf("%s ~ %s", by, x),
-                     value.var="n_prop",
-                     fill = "0 (0.0)")
+                        formula = sprintf("%s ~ %s", by, x),
+                        value.var="n_prop",
+                        fill = "0 (0.0)")
 
         setnames(cat_tbl,
                  names(cat_tbl)[-1],
@@ -84,7 +88,7 @@ baseTable = function(data, by = NULL, include = NULL, median.vars = NULL,
           setnames(cat_tbl,
                    names(cat_tbl)[length(cat_tbl)],
                    sprintf("%s: %s",x, trimws(names(cat_tbl))[length(cat_tbl)]))
-          cat_tbl = cat_tbl[,c(1, length(cat_tbl)),with=F] |>
+          cat_tbl = cat_tbl[,c(1, length(cat_tbl)), with=F] |>
             transpose(make.names = 1, keep.names = "Variable")
         } else {
           cat_tbl = cat_tbl |>
