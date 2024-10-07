@@ -4,7 +4,7 @@
 \alias{nProp}
 \title{Print frequency and proportion of a vector}
 \usage{
-nProp(x, digits = 1, missing = FALSE)
+nProp(x, digits = 1, missing = FALSE, paste = FALSE)
 }
 \arguments{
 \item{x}{A vector to check frequency and proportion}
@@ -12,6 +12,8 @@ nProp(x, digits = 1, missing = FALSE)
 \item{digits}{A digit for proportions}
 
 \item{missing}{Whether considering NA values. Default is FALSE.}
+
+\item{paste}{Whehter to paste freq and prop. Default is FALSE.}
 }
 \description{
 Create a table that checks the n, proportion of a vector. Compatible with data.table.
